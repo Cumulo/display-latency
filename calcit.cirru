@@ -3213,10 +3213,11 @@
                                         :id |HVIWfhF-AQ
                                       |r $ {} (:type :expr) (:by |B1y7Rc-Zz) (:at 1586796841351)
                                         :data $ {}
-                                          |T $ {} (:type :leaf) (:by |B1y7Rc-Zz) (:at 1586796842878) (:text |:width) (:id |RDj2iuFjileaf)
-                                          |j $ {} (:type :leaf) (:by |B1y7Rc-Zz) (:at 1586796849178) (:text |240) (:id |mV49HAlyS)
+                                          |T $ {} (:type :leaf) (:by |B1y7Rc-Zz) (:at 1586798267383) (:text |:max-width) (:id |RDj2iuFjileaf)
+                                          |j $ {} (:type :leaf) (:by |B1y7Rc-Zz) (:at 1586798272013) (:text |320) (:id |mV49HAlyS)
                                         :id |RDj2iuFji
                                     :id |7ef892eJ-
+                                  |T $ {} (:type :leaf) (:by |B1y7Rc-Zz) (:at 1586798256427) (:text |ui/expand) (:id |LeNNRQsMm)
                                 :id |ulj4St8ocI
                             :id |XPeg0JajiX
                         :id |q0dpn7VseR

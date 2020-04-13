@@ -20,7 +20,7 @@
  (div
   {:style (merge ui/expand ui/row)}
   (list->
-   {:style (merge {:padding 16, :width 240})}
+   {:style (merge ui/expand {:padding 16, :max-width 320})}
    (->> records
         (sort-by (fn [[k info]] (unchecked-negate (:start-time info))))
         (map

@@ -30,9 +30,11 @@
              {}
              (<> (:start-time info) {:font-family ui/font-code})
              (=< 16 nil)
-             (<>
-              (str (- (:finish-time info) (:start-time info)) "ms")
-              {:font-family ui/font-code}))]))))
+             (if (nil? (:finish-time info))
+               (<> "...")
+               (<>
+                (str (- (:finish-time info) (:start-time info)) "ms")
+                {:font-family ui/font-code})))]))))
   (div
    {:style {:padding 16}}
    (button

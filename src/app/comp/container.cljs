@@ -2,7 +2,7 @@
 (ns app.comp.container
   (:require [hsl.core :refer [hsl]]
             [respo-ui.core :as ui]
-            [respo.core :refer [defcomp <> >> div span button]]
+            [respo.core :refer [defcomp <> >> div list-> span button pre]]
             [respo.comp.inspect :refer [comp-inspect]]
             [respo.comp.space :refer [=<]]
             [app.comp.navigation :refer [comp-navigation]]
@@ -13,6 +13,32 @@
             [app.config :refer [dev?]]
             [app.schema :as schema]
             [app.config :as config]))
+
+(defcomp
+ comp-home
+ (records)
+ (div
+  {:style (merge ui/expand ui/row)}
+  (list->
+   {:style (merge ui/expand {:padding 16, :max-width 320})}
+   (->> records
+        (sort-by (fn [[k info]] (unchecked-negate (:start-time info))))
+        (map
+         (fn [[k info]]
+           [k
+            (div
+             {}
+             (<> (:start-time info) {:font-family ui/font-code})
+             (=< 16 nil)
+             (if (nil? (:finish-time info))
+               (<> "...")
+               (<>
+                (str (- (:finish-time info) (:start-time info)) "ms")
+                {:font-family ui/font-code})))]))))
+  (div
+   {:style {:padding 16}}
+   (button
+    {:style ui/button, :inner-text "Reset", :on-click (fn [e d!] (d! :effect/clear nil))}))))
 
 (defcomp
  comp-offline
@@ -51,7 +77,7 @@
 
 (defcomp
  comp-container
- (states store)
+ (states records store)
  (let [state (:data states)
        session (:session store)
        router (:router store)
@@ -63,7 +89,7 @@
       (comp-navigation (:logged-in? store) (:count store))
       (if (:logged-in? store)
         (case (:name router)
-          :home (<> "Home")
+          :home (comp-home records)
           :profile (comp-profile (:user store) (:data router))
           (<> router))
         (comp-login (>> states :login)))

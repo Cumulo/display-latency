@@ -81,6 +81,7 @@
     :on-data (fn [sid action]
       (case (:kind action)
         :op (dispatch! (:op action) (:data action) sid)
+        :ping (wss-send! sid action)
         (println "unknown data" action))),
     :on-close (fn [sid event]
       (js/console.warn "Client closed!")

@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "feather-icons": "^4.28.0",
-    "url-parse": "^1.5.8",
+    "url-parse": "^1.5.9",
     "vite": "^2.8.4"
   }
 }

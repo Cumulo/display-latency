@@ -1,12 +1,13 @@
 {
   "name": "cumulo-workflow",
   "version": "0.1.0",
+  "packageManager": "yarn@4.12.0",
   "description": "Cumulo Workflow",
   "main": "index.js",
   "scripts": {
-    "compile-page": "cr --emit-js --once",
-    "release-page": "vite build --base=./",
-    "watch-page": "cr --emit-js"
+    "compile-page": "calcit calcit.cirru js",
+    "release-page": "vite build --base=\"${VITE_BASE_URL:-./}\"",
+    "watch-page": "calcit -w calcit.cirru js"
   },
   "repository": {
     "type": "git",
@@ -15,12 +16,11 @@
   "author": "jiyinyiyong",
   "license": "MIT",
   "dependencies": {
-    "@calcit/procs": "^0.7.0",
+    "@calcit/procs": "0.29.0",
     "bottom-tip": "^0.1.5"
   },
   "devDependencies": {
     "feather-icons": "^4.29.0",
-    "url-parse": "^1.5.10",
-    "vite": "^4.3.9"
+    "vite": "8.3.4"
   }
 }

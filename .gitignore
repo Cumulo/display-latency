@@ -1,10 +1,13 @@
 
 .compact-inc.cirru
 .calcit-error.cirru
+.calcit/
+.yarn/*.gz
 
 js-out/
 node_modules/
 dist/
+dist-server/
 
 yarn-error.log
 

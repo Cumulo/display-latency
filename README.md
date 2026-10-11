@@ -43,7 +43,7 @@ before consuming this source. Keep the server deployment at
 
 Frontend builds accept `VITE_BASE_URL`, defaulting to `./` for local use. CI
 uses `https://cos-sh.tiye.me/Cumulo/display-latency/` for production and the
-separate `pr/` prefix for PR assets. Only frontend `dist/` is uploaded to COS;
+separate `pr/<number>/` prefix for each PR's assets. Only frontend `dist/` is uploaded to COS;
 the upload action performs its own public-file verification. Neither
 `js-out/`, `dist/` nor `dist-server/` belongs in Git.
 

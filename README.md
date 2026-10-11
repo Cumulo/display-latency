@@ -15,6 +15,9 @@ https://github.com/Cumulo/cumulo-workflow
 Use the exact Calcit version in `deps.cirru` (currently `0.29.0`), Node 24 and
 Yarn 4.12.0. Module dependencies are pinned to published stable releases.
 
+`calcit.cirru` is the canonical source and `deps.cirru` is the module manifest.
+The retired `compact.cirru` and `package.cirru` files are no longer used or tracked.
+
 ```bash
 corepack enable
 caps --strict --ci

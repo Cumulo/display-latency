@@ -229,14 +229,14 @@
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.client
           :require
-            [] respo.core :refer $ [] render! clear-cache! realize-ssr!
-            [] respo.cursor :refer $ [] update-states
-            [] app.comp.container :refer $ [] comp-container
-            [] cljs.reader :refer $ [] read-string
-            [] app.schema :as schema
-            [] app.config :as config
+            respo.core :refer $ render! clear-cache! realize-ssr!
+            respo.cursor :refer $ update-states
+            app.comp.container :refer $ comp-container
+            cljs.reader :refer $ read-string
+            app.schema :as schema
+            app.config :as config
             ws-edn.client :refer $ ws-connect! ws-send! ws-connected? checked-now-ms
-            [] recollect.patch :refer $ [] patch-twig
+            recollect.patch :refer $ patch-twig
             cumulo-util.core :refer $ on-page-touch
             js-ffi.browser :as browser
             js-ffi.shared :as shared
@@ -376,19 +376,19 @@
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.comp.container
           :require
-            [] respo-ui.core :refer $ [] hsl
-            [] respo-ui.core :as ui
-            [] respo.core :refer $ [] defcomp <> >> div list-> span button pre
-            [] respo.comp.inspect :refer $ [] comp-inspect
-            [] respo.comp.space :refer $ [] =<
-            [] app.comp.navigation :refer $ [] comp-navigation
-            [] app.comp.profile :refer $ [] comp-profile
-            [] app.comp.login :refer $ [] comp-login
-            [] respo-message.comp.messages :refer $ [] comp-messages
-            [] cumulo-reel.comp.reel :refer $ [] comp-reel
-            [] app.config :refer $ [] dev?
-            [] app.schema :as schema
-            [] app.config :as config
+            respo-ui.core :refer $ hsl
+            respo-ui.core :as ui
+            respo.core :refer $ defcomp <> >> div list-> span button pre
+            respo.comp.inspect :refer $ comp-inspect
+            respo.comp.space :refer $ =<
+            app.comp.navigation :refer $ comp-navigation
+            app.comp.profile :refer $ comp-profile
+            app.comp.login :refer $ comp-login
+            respo-message.comp.messages :refer $ comp-messages
+            cumulo-reel.comp.reel :refer $ comp-reel
+            app.config :refer $ dev?
+            app.schema :as schema
+            app.config :as config
     'app.comp.login $ %{} 'FileEntry
       :defs $ {}
         'comp-login $ %{} 'CodeEntry (:doc |)
@@ -477,12 +477,12 @@
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.comp.login
           :require
-            [] respo.core :refer $ [] defcomp <> div input button span
-            [] respo.comp.space :refer $ [] =<
-            [] respo.comp.inspect :refer $ [] comp-inspect
-            [] respo-ui.core :as ui
-            [] app.schema :as schema
-            [] app.config :as config
+            respo.core :refer $ defcomp <> div input button span
+            respo.comp.space :refer $ =<
+            respo.comp.inspect :refer $ comp-inspect
+            respo-ui.core :as ui
+            app.schema :as schema
+            app.config :as config
             js-ffi.browser :as browser
     'app.comp.navigation $ %{} 'FileEntry
       :defs $ {} $ 'comp-navigation
@@ -525,11 +525,11 @@
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.comp.navigation
           :require
-            [] respo-ui.core :refer $ [] hsl
-            [] respo-ui.core :as ui
-            [] respo.comp.space :refer $ [] =<
-            [] respo.core :refer $ [] defcomp <> span div
-            [] app.config :as config
+            respo-ui.core :refer $ hsl
+            respo-ui.core :as ui
+            respo.comp.space :refer $ =<
+            respo.core :refer $ defcomp <> span div
+            app.config :as config
             app.schema :as schema
     'app.comp.profile $ %{} 'FileEntry
       :defs $ {} $ 'comp-profile
@@ -595,12 +595,12 @@
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.comp.profile
           :require
-            [] respo-ui.core :refer $ [] hsl
-            [] app.schema :as schema
-            [] respo-ui.core :as ui
-            [] respo.core :refer $ [] defcomp list-> <> span div button
-            [] respo.comp.space :refer $ [] =<
-            [] app.config :as config
+            respo-ui.core :refer $ hsl
+            app.schema :as schema
+            respo-ui.core :as ui
+            respo.core :refer $ defcomp list-> <> span div button
+            respo.comp.space :refer $ =<
+            app.config :as config
             js-ffi.browser :as browser
             js-ffi.shared :as shared
     'app.config $ %{} 'FileEntry
@@ -705,7 +705,11 @@
         'apply-store-patch $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn apply-store-patch (store changes)
             match
-              try-patch-twig (.unwrap-or store nil) changes
+              try-patch-twig
+                match store
+                  (:some value) value
+                  (:none) nil
+                , changes
               (:err detail)
                 Result :err $ patch-error-message detail
               (:ok value) (decode-client-store value)
@@ -1385,7 +1389,9 @@
                   (:none) &unit
                   (:some session)
                     let
-                        old-store $ .unwrap-or (get @*client-caches sid) nil
+                        old-store $ match (get @*client-caches sid)
+                          (:some value) value
+                          (:none) nil
                         new-store $ twig-container db session $ :records reel
                         changes $ diff-twig old-store new-store $ {} (:key :id)
                       when
@@ -1483,7 +1489,7 @@
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.twig.container
           :require
-            [] app.twig.user :refer $ [] twig-user
+            app.twig.user :refer $ twig-user
             calcit.std.rand :refer $ rand-hex-color!
             app.schema :as schema
     'app.twig.user $ %{} 'FileEntry
@@ -1567,8 +1573,8 @@
             :tags $ #{} :server
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.updater
-          :require ([] app.updater.session :as session) ([] app.updater.user :as user) ([] app.updater.router :as router) ([] app.schema :as schema)
-            [] respo-message.updater :refer $ [] update-messages
+          :require (app.updater.session :as session) (app.updater.user :as user) (app.updater.router :as router) (app.schema :as schema)
+            respo-message.updater :refer $ update-messages
     'app.updater.router $ %{} 'FileEntry
       :defs $ {} $ 'change
         %{} 'CodeEntry (:doc |)
@@ -1612,7 +1618,7 @@
             :args $ [] 'app.schema/Db 'String 'Number 'String 'Number
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.updater.session
-          :require $ [] app.schema :as schema
+          :require $ app.schema :as schema
     'app.updater.user $ %{} 'FileEntry
       :defs $ {}
         'log-in $ %{} 'CodeEntry (:doc |)

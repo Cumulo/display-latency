@@ -15,21 +15,21 @@
     'app.client $ %{} 'FileEntry
       :defs $ {}
         '*ping-timer $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *ping-timer (Option :none)
+          :code $ quote $ defref *ping-timer (Option :none)
           :examples $ []
           :schema $ :: 'Ref $ :: 'Option 'Number
         '*records $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *records ({})
+          :code $ quote $ defref *records ({})
           :examples $ []
           :schema $ :: 'Ref $ :: 'Map 'String 'app.schema/LatencyRecord
         '*states $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *states
+          :code $ quote $ defref *states
             {} $ :states $ {}
               :cursor $ []
           :examples $ []
           :schema $ :: 'Ref $ :: 'Map 'Tag 'Dynamic
         '*store $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *store (Option :none)
+          :code $ quote $ defref *store (Option :none)
           :examples $ []
           :schema $ :: 'Ref $ :: 'Option 'app.schema/ClientStore
         'connect! $ %{} 'CodeEntry (:doc |)
@@ -1207,11 +1207,11 @@
     'app.server $ %{} 'FileEntry
       :defs $ {}
         '*client-caches $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *client-caches ({})
+          :code $ quote $ defref *client-caches ({})
           :examples $ []
           :schema $ :: 'Ref $ :: 'Map 'Number 'app.schema/ClientStore
         '*initial-db $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *initial-db
+          :code $ quote $ defref *initial-db
             if (path-exists? storage-file)
               do (println "|Found local EDN data")
                 match
@@ -1223,11 +1223,11 @@
           :examples $ []
           :schema $ :: 'Ref 'app.schema/Db
         '*reader-reel $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *reader-reel @*reel
+          :code $ quote $ defref *reader-reel @*reel
           :examples $ []
           :schema $ :: 'Ref $ :: 'cumulo-reel.core/ReelState 'app.schema/Db
         '*reel $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defatom *reel
+          :code $ quote $ defref *reel
             ReelState :base @*initial-db :db @*initial-db :records ([]) :merged? false
           :examples $ []
           :schema $ :: 'Ref $ :: 'cumulo-reel.core/ReelState 'app.schema/Db

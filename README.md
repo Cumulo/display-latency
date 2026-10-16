@@ -18,7 +18,8 @@ prerelease pair, not stable Calcit 0.30.1. Module dependencies use exact release
 
 本轮实际配对到 0.30.1-alpha.4，并同步 Cumulo Reel、Recollect、WS-EDN、
 Respo/UI/Message 及 Util 的正式模块版本；稳定 0.30.0 消费者不能混用新旧图。
-清理 8 个 namespace 的旧 imports `[]` 标记。两处初始 diff 输入从
+清理 8 个 namespace 的旧 imports `[]` 标记，并将 8 处同实现的旧 `defatom`
+声明改为 `defref`，保留初始化表达式、Ref schema 和重载状态行为。两处初始 diff 输入从
 `Option<ClientStore>.unwrap-or nil` 改为显式 Some/None 分支：已有值原样使用，
 缺失仍用 nil 生成/恢复初始快照，不增加强转、重复解码或业务默认值。
 

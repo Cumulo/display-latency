@@ -30,7 +30,7 @@ jobs:
       - uses: calcit-lang/setup-calcit@ca701be5a471759e442aa053cd100720bbe1f09f # v1.5.0
         with:
           tools: calcit,caps
-          version: 0.29.0
+          deps-file: deps.cirru
           caps-version: 0.1.1
 
       - name: Install dependencies
@@ -50,8 +50,10 @@ jobs:
 
       - name: Check Calcit entries and attached tests
         run: |
+          set -euo pipefail
           calcit --check-only
           calcit --entry server --check-only
+          calcit fix --workflow strict --verify --format edn
           calcit --entry server test --tag server --require-match
           calcit analyze weak-types --only deprecated-call --summary-only --format json | jq -e '.data.summary.calls == 0'
 

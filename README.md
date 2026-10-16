@@ -35,6 +35,17 @@ yarn compile-page
 yarn release-page
 ```
 
+`yarn watch-page` uses `calcit calcit.cirru js -w`: JavaScript generation and
+watch mode are both explicit. In this CLI, `-w` belongs after the `js`
+subcommand; `calcit -w calcit.cirru js` emits once and exits. The configured
+default entry is already JS, so `calcit -w calcit.cirru` also selects JS watch,
+but the explicit form avoids relying on that entry setting.
+After saving structured CLI edits, publish the changed definitions through
+`calcit edit inc --changed <namespace/definition>` to notify the running
+watcher. Its ignored `.compact-inc.cirru` is a transient change notification,
+not the retired `compact.cirru` source format; do not commit either generated JS
+or the notification file.
+
 The native server also needs `calcit.std` and `calcit-wss` built on its target
 machine. Run `cargo build --release --locked` inside each installed module,
 then copy its `libcalcit_std` / `libcalcit_wss` shared library into that module's

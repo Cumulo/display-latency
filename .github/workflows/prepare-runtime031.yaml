@@ -1,0 +1,65 @@
+name: Independent formal runtime acceptance
+on:
+  push:
+    branches: [prepare/display-latency-runtime031]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6.5.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: |
+          corepack enable
+          corepack prepare yarn@4.18.0 --activate
+      - uses: calcit-lang/setup-calcit@v1.5.0
+        with:
+          tools: calcit,caps
+          caps-version: '0.1.1'
+          deps-file: deps.cirru
+      - name: Resolve published formal graph and native builds once
+        run: |
+          set -euo pipefail
+          test "$(git hash-object calcit.cirru)" = d97871a7988ddd7738e1b9eb65c8fc709db069a3
+          caps --strict --ci
+          yarn install --immutable
+          caps verify --toolchain
+          test -f .calcit/modules/calcit.std/dylibs/libcalcit_std.so
+          test -f .calcit/modules/calcit-wss/dylibs/libcalcit_wss.so
+      - name: Verify original Snapshot and both entry contracts
+        run: |
+          set -euo pipefail
+          mkdir -p acceptance/results
+          calcit edit format
+          git diff --exit-code -- calcit.cirru
+          calcit --check-only --format json > acceptance/results/client.json
+          calcit --entry server --check-only --format json > acceptance/results/server.json
+          calcit fix --workflow strict --verify --format json > acceptance/results/strict.json
+          jq -e '.data.workflow.status == "passed" and .diagnostics == []' acceptance/results/strict.json
+          calcit --entry server test --tag server --require-match --summary-only --format json > acceptance/results/tests.json
+          jq -e '.selected == 10 and .passed == 10 and .failed == 0' acceptance/results/tests.json
+          calcit analyze weak-types --coverage --format json > acceptance/results/coverage.json
+          calcit analyze weak-types --only deprecated-call --summary-only --format json | jq -e '.data.summary.calls == 0'
+      - name: Build original frontend and exercise actual native server
+        run: |
+          set -euo pipefail
+          yarn compile-page
+          VITE_BASE_URL=./ yarn release-page
+          node acceptance/native-runtime.mjs
+          cp -R dist acceptance/results/dist
+          git diff --exit-code -- calcit.cirru
+          test "$(git hash-object calcit.cirru)" = d97871a7988ddd7738e1b9eb65c8fc709db069a3
+      - uses: actions/upload-artifact@v7.0.1
+        if: always()
+        with:
+          name: display-latency-acceptance-${{ github.run_id }}-${{ github.run_attempt }}
+          path: acceptance/results
+          retention-days: 7
+          if-no-files-found: error

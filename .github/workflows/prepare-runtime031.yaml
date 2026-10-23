@@ -39,8 +39,8 @@ jobs:
           mkdir -p acceptance/results
           calcit edit format
           git diff --exit-code -- calcit.cirru
-          calcit --check-only --format json > acceptance/results/client.json
-          calcit --entry server --check-only --format json > acceptance/results/server.json
+          calcit --check-only --keep-going --format json > acceptance/results/client.json
+          calcit --entry server --check-only --keep-going --format json > acceptance/results/server.json
           calcit fix --workflow strict --verify --format json > acceptance/results/strict.json
           jq -e '.data.workflow.status == "passed" and .diagnostics == []' acceptance/results/strict.json
           calcit --entry server test --tag server --require-match --summary-only --format json > acceptance/results/tests.json

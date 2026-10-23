@@ -21,7 +21,14 @@ use exact formal release tags, never main/hash or an alpha substitute.
 Respo 0.16.124、JS-FFI 0.2.5、Recollect 0.0.67、WS-EDN 0.0.47、
 calcit.std 0.2.44 / calcit-wss 0.2.37。UI 0.8 基础样式可能影响外观。
 Snapshot 与原 10 项 server 附带测试保持不变，不因版本升级改写业务协议或存档。
-完整 strict 必须同时报告 passed 且 diagnostics 为空；正式 CI 与实际验收待完成。
+正式 Linux 独立验收已通过 browser 241/native 72、双入口完整 strict
+（passed 且 diagnostics 为空）、原 10 项测试与前端构建。真实 native 进程与
+实际生成的 JS decoder 已回放初始/增量 patch、Unicode ping、非法凭据拒绝后恢复、
+合成账户/profile、SIGINT 及存储/备份一致。没有改业务 Snapshot 或原测试。
+当前覆盖率为 64 full / 22 partial / 0 none；开放 wire、异构 UI 状态及历史日志
+仍按使用处检查，不将声明正式版本等同于类型债务清零。
+本地只验收了原构建的离线画面；未启动 native 后端，连接拒绝是该验收的预期结果，
+不能据此宣称浏览器/native 全链路、登录后的自动延迟循环已验收。
 此次不自动合并或部署：生产后端须先准备匹配的正式 CLI 与 native 依赖。
 
 ### 上一轮 alpha.4 迁移记录

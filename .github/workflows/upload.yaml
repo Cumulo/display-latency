@@ -14,20 +14,21 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
 
-      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+      - uses: actions/setup-node@v6.5.0
         with:
           node-version: 24
+          package-manager-cache: false
 
       - name: Enable Corepack
         run: |
           corepack enable
-          corepack prepare yarn@4.12.0 --activate
+          corepack prepare yarn@4.18.0 --activate
 
-      - uses: calcit-lang/setup-calcit@ca701be5a471759e442aa053cd100720bbe1f09f # v1.5.0
+      - uses: calcit-lang/setup-calcit@v1.5.0
         with:
           tools: calcit,caps
           deps-file: deps.cirru
@@ -35,25 +36,23 @@ jobs:
 
       - name: Install dependencies
         run: |
+          set -euo pipefail
           caps --strict --ci
           yarn install --immutable
           caps verify --toolchain
 
-      - name: Build native dependencies
-        run: |
-          for name in calcit_std calcit_wss; do
-            if [ "$name" = calcit_std ]; then module=.calcit/modules/calcit.std; else module=.calcit/modules/calcit-wss; fi
-            cargo build --release --locked --manifest-path "$module/Cargo.toml"
-            mkdir -p "$module/dylibs"
-            cp "$module/target/release/lib${name}.so" "$module/dylibs/"
-          done
-
       - name: Check Calcit entries and attached tests
         run: |
           set -euo pipefail
+          test -f calcit.cirru
+          test -f deps.cirru
+          test ! -e compact.cirru
+          test ! -e package.cirru
+          calcit edit format
+          git diff --exit-code -- calcit.cirru
           calcit --check-only
           calcit --entry server --check-only
-          calcit fix --workflow strict --verify --format edn
+          calcit fix --workflow strict --verify --format json | jq -e '.data.workflow.status == "passed" and .diagnostics == []'
           calcit --entry server test --tag server --require-match
           calcit analyze weak-types --only deprecated-call --summary-only --format json | jq -e '.data.summary.calls == 0'
 
@@ -63,7 +62,8 @@ jobs:
           CDN_ORIGIN: https://cos-sh.tiye.me
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          if [ "$GITHUB_EVENT_NAME" = pull_request ]; then prefix="${GITHUB_REPOSITORY}/pr/${PR_NUMBER}/"; else prefix="${GITHUB_REPOSITORY}/"; fi
+          set -euo pipefail
+          if [ "$GITHUB_EVENT_NAME" = pull_request ]; then prefix="${GITHUB_REPOSITORY}/pr/${PR_NUMBER}/${GITHUB_RUN_ID}/${GITHUB_RUN_ATTEMPT}/"; else prefix="${GITHUB_REPOSITORY}/"; fi
           base_url="${CDN_ORIGIN}/${prefix}"
           echo "prefix=$prefix" >> "$GITHUB_OUTPUT"
           echo "base-url=$base_url" >> "$GITHUB_OUTPUT"

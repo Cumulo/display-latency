@@ -45,7 +45,7 @@ jobs:
           jq -e '.data.workflow.status == "passed" and .diagnostics == []' acceptance/results/strict.json
           calcit --entry server test --tag server --require-match --summary-only --format json > acceptance/results/tests.json
           jq -e '.selected == 10 and .passed == 10 and .failed == 0' acceptance/results/tests.json
-          calcit analyze weak-types --coverage --format json > acceptance/results/coverage.json
+          calcit analyze weak-types --only coverage --format json > acceptance/results/coverage.json
           calcit analyze weak-types --only deprecated-call --summary-only --format json | jq -e '.data.summary.calls == 0'
       - name: Build original frontend and exercise actual native server
         run: |

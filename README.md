@@ -6,11 +6,39 @@ Display Latency
 
 The time displayed is the duration between a client emits event and receives event back.
 
+### 正式 0.31.0 迁移候选：使用者影响
+
+Calcit CLI / `@calcit/procs` 配对正式 **0.31.0**。下游依赖使用已发布的精确 tag：
+Cumulo Reel 0.1.0-alpha.2、Util 0.0.33、Message 0.1.0-alpha.3、UI 0.9.0-alpha.4、
+Respo 0.17.0-alpha.4、JS-FFI 0.2.7、Recollect 0.1.0-alpha.4、WS-EDN 0.0.49、
+calcit.std 0.2.45、calcit-wss 0.2.38；旧 0.30 工具链不能与该图混用。
+部署前须准备匹配的 native CLI、依赖及 dylib，并安排服务重启。
+
+UI 的标准派发使用既有 `UiAction`，服务端操作包在 `:server` 中，发送前仍解码回原 `Op`；
+旧 Op 与匿名 Reel 操作的受检兼容入口保留，wire 协议和存档格式不变。
+迁移 33 处 List/Map 调用；raw 路由恢复的一处更新继续使用公开 `assoc`，保持开放输入合同。
+资料页 Refresh 现在保留 pathname、host/port 等现有查询与 hash，只更新 time，避免自定义
+后端连接被刷新丢失。登录信息仍按原逻辑保存，reload 和现有错误处理不改。
+
+原双入口检查、10 项服务端测试、完整 strict、弃用调用门禁和 COS 内置校验保留。
+CI 补齐 server 入口完整 strict，两个入口均绑定实际 `UiAction`，不放宽类型或基线。
+前端 COS 仍仅上传 dist；原前端及 `/servers/display-latency/` 部署路径保持。
+合并 main 会按原工作流复制后端源码，故本候选不自动合并或部署。
+
+当前候选已通过正式发布依赖的 Caps strict/immutable 安装、browser 241/native 72 可达定义、
+双入口完整 strict（空 diagnostics）、原 10 项服务端测试与前端构建。
+隔离 native + 实际浏览器已验证合成注册、错误凭据拒绝后恢复、自动登录、资料导航、
+消息移除、延迟循环/清空和 Refresh 保留查询/hash；SIGINT 存档与备份一致，重启恢复通过。
+本机为 macOS arm64，native 验收副本仅追加官方 WSS 回环绑定参数，原源树监听默认值不改。
+这些记录不代表生产部署已就绪；当前候选的精确远端 CI 和 comments 仍须继续核对。
+
+下文 0.30.1 验收为历史记录，不代替当前候选的精确 CI 和实际联机验收。
+
 ### Workflow
 
 https://github.com/Cumulo/cumulo-workflow
 
-### Development
+### 上一轮 0.30.1 开发与验收记录
 
 Use the exact formal Calcit **0.30.1** in `deps.cirru`, Node 24 and Yarn 4.18.0.
 Calcit CLI and `@calcit/procs` must match. Reinstall dependencies, restart the

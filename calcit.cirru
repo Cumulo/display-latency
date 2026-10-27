@@ -6,11 +6,11 @@
     :default $ {} (:description |) (:init-fn 'app.client/main!) (:mode :js) (:reload-fn 'app.client/reload!) (:target :browser)
       :feature-policy $ {}
       :modules $ [] |respo.calcit/ |recollect/ |respo-ui.calcit/ |ws-edn.calcit/ |cumulo-util.calcit/ |respo-message.calcit/ |cumulo-reel.calcit/ |js-ffi/
-      :type-slots $ {}
+      :type-slots $ {} $ :dispatch-op |app.schema/UiAction
     :server $ {} (:description |) (:init-fn 'app.server/main!) (:mode :native) (:reload-fn 'app.server/reload!) (:target :native)
       :feature-policy $ {}
       :modules $ [] |recollect/ |cumulo-util.calcit/ |cumulo-reel.calcit/ |calcit-wss/ |calcit.std/
-      :type-slots $ {}
+      :type-slots $ {} $ :dispatch-op |app.schema/UiAction
   :files $ {}
     'app.client $ %{} 'FileEntry
       :defs $ {}
@@ -147,7 +147,7 @@
                       match (get records id)
                         (:none) records
                         (:some record)
-                          assoc records id $ struct-with record $ :finish-time
+                          .assoc records id $ struct-with record $ :finish-time
                             Option :some $ checked-now-ms
             , &unit
           :examples $ []
@@ -208,7 +208,9 @@
                   let
                       id $ generate-id!
                       record $ schema/LatencyRecord :id id :start-time (checked-now-ms) :finish-time $ Option :none
-                    swap! *records assoc id record
+                    swap! *records
+                      fn (current key value) (.assoc current key value)
+                      , id record
                     ws-send! $ {} (:kind :ping) (:op :effect/ping) (:data id)
                 , &unit
               , 2000
@@ -281,12 +283,13 @@
                         hint-fn $ {}
                           :args $ [] (:: 'Map 'Tag 'Dynamic)
                             :: 'Fn $ {}
-                              :args $ [] 'Dynamic
+                              :args $ [] 'app.schema/UiAction
                               :return 'Unit
                           :return 'Unit
-                        d! $ schema/Op :session/remove-message $ decode-map-as
-                          .unwrap $ get info :id
-                          , 'String
+                        d! $ schema/UiAction :server $ schema/Op :session/remove-message
+                          decode-map-as
+                            .unwrap $ get info :id
+                            , 'String
                     when dev? $ comp-reel (:reel-length store) ({})
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'respo.schema/Component)
@@ -329,7 +332,7 @@
                     hint-fn $ {}
                       :args $ [] (:: 'Map 'Tag 'Dynamic)
                         :: 'Fn $ {}
-                          :args $ [] 'Dynamic
+                          :args $ [] 'app.schema/UiAction
                           :return 'Unit
                       :return 'Unit
                     d! $ schema/UiAction :clear
@@ -356,7 +359,7 @@
                     hint-fn $ {}
                       :args $ [] (:: 'Map 'Tag 'Dynamic)
                         :: 'Fn $ {}
-                          :args $ [] 'Dynamic
+                          :args $ [] 'app.schema/UiAction
                           :return 'Unit
                       :return 'Unit
                     d! $ schema/UiAction :connect
@@ -414,7 +417,7 @@
                           hint-fn $ {}
                             :args $ [] (:: 'Map 'Tag 'Dynamic)
                               :: 'Fn $ {}
-                                :args $ [] 'Dynamic
+                                :args $ [] 'app.schema/UiAction
                                 :return 'Unit
                             :return 'Unit
                           d! $ schema/UiAction :states cursor $ struct-with state
@@ -430,7 +433,7 @@
                           hint-fn $ {}
                             :args $ [] (:: 'Map 'Tag 'Dynamic)
                               :: 'Fn $ {}
-                                :args $ [] 'Dynamic
+                                :args $ [] 'app.schema/UiAction
                                 :return 'Unit
                             :return 'Unit
                           d! $ schema/UiAction :states cursor $ struct-with state
@@ -460,10 +463,12 @@
               hint-fn $ {}
                 :args $ [] (:: 'Map 'Tag 'Dynamic)
                   :: 'Fn $ {}
-                    :args $ [] 'Dynamic
+                    :args $ [] 'app.schema/UiAction
                     :return 'Unit
                 :return 'Unit
-              dispatch! $ if signup? (schema/Op :user/sign-up username password) (schema/Op :user/log-in username password)
+              dispatch! $ if signup?
+                schema/UiAction :server $ schema/Op :user/sign-up username password
+                schema/UiAction :server $ schema/Op :user/log-in username password
               browser/storage-set! (:storage-key config/site)
                 format-cirru-edn $ [] username password
               , &unit
@@ -473,7 +478,7 @@
             :return $ :: 'Fn $ {} (:return 'Unit)
               :args $ [] (:: 'Map 'Tag 'Dynamic)
                 :: 'Fn $ {} (:return 'Unit)
-                  :args $ [] 'Dynamic
+                  :args $ [] 'app.schema/UiAction
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.comp.login
           :require
@@ -499,10 +504,11 @@
                     hint-fn $ {}
                       :args $ [] (:: 'Map 'Tag 'Dynamic)
                         :: 'Fn $ {}
-                          :args $ [] 'Dynamic
+                          :args $ [] 'app.schema/UiAction
                           :return 'Unit
                       :return 'Unit
-                    d! $ schema/Op :router/change $ struct-with schema/router (:name :home)
+                    d! $ schema/UiAction :server $ schema/Op :router/change
+                      struct-with schema/router $ :name :home
                   :style $ {} $ :cursor :pointer
                 <> (:title config/site) nil
               div
@@ -512,10 +518,11 @@
                     hint-fn $ {}
                       :args $ [] (:: 'Map 'Tag 'Dynamic)
                         :: 'Fn $ {}
-                          :args $ [] 'Dynamic
+                          :args $ [] 'app.schema/UiAction
                           :return 'Unit
                       :return 'Unit
-                    d! $ schema/Op :router/change $ struct-with schema/router (:name :profile)
+                    d! $ schema/UiAction :server $ schema/Op :router/change
+                      struct-with schema/router $ :name :profile
                 <> $ if logged-in? |Me |Guest
                 =< 8 nil
                 <> $ str count-members
@@ -567,12 +574,14 @@
                       hint-fn $ {}
                         :args $ [] (:: 'Map 'Tag 'Dynamic)
                           :: 'Fn $ {}
-                            :args $ [] 'Dynamic
+                            :args $ [] 'app.schema/UiAction
                             :return 'Unit
                         :return 'Unit
-                      browser/location-replace! $ str
-                        :origin $ browser/location-snapshot
-                        , |?time= $ shared/now-ms
+                      let
+                          location $ browser/location-snapshot
+                          query $ shared/search-params-create $ :search location
+                        shared/search-params-set! query |time $ str $ shared/now-ms
+                        browser/location-replace! $ str (:origin location) (:pathname location) |? (shared/search-params-string query) (:hash location)
                   <> |Refresh
                 =< 8 nil
                 button
@@ -582,10 +591,10 @@
                       hint-fn $ {}
                         :args $ [] (:: 'Map 'Tag 'Dynamic)
                           :: 'Fn $ {}
-                            :args $ [] 'Dynamic
+                            :args $ [] 'app.schema/UiAction
                             :return 'Unit
                         :return 'Unit
-                      dispatch! $ schema/Op :user/log-out
+                      dispatch! $ schema/UiAction :server $ schema/Op :user/log-out
                       browser/storage-remove! $ :storage-key config/site
                       , &unit
                   <> "|Log out"
@@ -800,7 +809,7 @@
                 :user/log-in $ let
                     credentials $ decode-map-as data $ :: 'List 'String
                   if
-                    = 2 $ count credentials
+                    = 2 $ .len credentials
                     Op :user/log-in
                       .unwrap $ nth credentials 0
                       .unwrap $ nth credentials 1
@@ -808,7 +817,7 @@
                 :user/sign-up $ let
                     credentials $ decode-map-as data $ :: 'List 'String
                   if
-                    = 2 $ count credentials
+                    = 2 $ .len credentials
                     Op :user/sign-up
                       .unwrap $ nth credentials 0
                       .unwrap $ nth credentials 1
@@ -856,8 +865,8 @@
               let
                   source $ struct-input value
                 try-decode-map-as
-                  assoc
-                    assoc source :sessions $ filter-map-kv
+                  .assoc
+                    .assoc source :sessions $ filter-map-kv
                       decode-map-as
                         .unwrap-or (get source :sessions) ({})
                         :: 'Map 'Number 'Dynamic
@@ -1121,8 +1130,8 @@
                 source $ struct-input value
                 nested $ optional-input $ get source :router
               assoc
-                assoc
-                  assoc source :title $ optional-input $ get source :title
+                .assoc
+                  .assoc source :title $ optional-input $ get source :title
                   , :data $ optional-input $ get source :data
                 , :router $ if
                   or (map? nested) (struct? nested)
@@ -1152,11 +1161,11 @@
           :code $ quote $ defn session-input (value)
             let
                 source $ struct-input value
-              assoc
-                assoc
-                  assoc
-                    assoc
-                      assoc source :id $ optional-input $ get source :id
+              .assoc
+                .assoc
+                  .assoc
+                    .assoc
+                      .assoc source :id $ optional-input $ get source :id
                       , :user-id $ optional-input $ get source :user-id
                     , :nickname $ optional-input $ get source :nickname
                   , :router $ router-input $ .unwrap-or (get source :router) router
@@ -1191,8 +1200,8 @@
           :code $ quote $ defn user-input (value)
             let
                 source $ struct-input value
-              assoc
-                assoc source :nickname $ optional-input $ get source :nickname
+              .assoc
+                .assoc source :nickname $ optional-input $ get source :nickname
                 , :avatar $ optional-input $ get source :avatar
           :examples $ []
           :schema $ :: 'Fn $ {}
@@ -1398,7 +1407,10 @@
                         not $ empty? changes
                         match
                           wss-send! sid $ format-cirru-edn $ {} (:kind :patch) (:data changes)
-                          (:accepted) (swap! *client-caches assoc sid new-store)
+                          (:accepted)
+                            swap! *client-caches
+                              fn (current key value) (.assoc current key value)
+                              , sid new-store
                           _ $ do (reset! complete? false) (println "|Client patch was not accepted:" sid)
                       , &unit
                 , &unit
@@ -1444,8 +1456,8 @@
                         _ $ Option :some $ {}
                       Option :none
                   , :count
-                    count $ :sessions db
-                    , :color (rand-hex-color!) :reel-length $ count records
+                    .len $ :sessions db
+                    , :color (rand-hex-color!) :reel-length $ .len records
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'app.schema/ClientStore)
             :args $ [] 'app.schema/Db 'app.schema/Session $ :: 'List (:: 'List 'Dynamic)
@@ -1583,7 +1595,7 @@
               get (:sessions db) sid
               (:none) db
               (:some session)
-                struct-with db $ :sessions $ assoc (:sessions db) sid
+                struct-with db $ :sessions $ .assoc (:sessions db) sid
                   struct-with session $ :router op-data
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'app.schema/Db)
@@ -1594,14 +1606,14 @@
       :defs $ {}
         'connect $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn connect (db op-data sid op-id op-time)
-            struct-with db $ :sessions $ assoc (:sessions db) sid
+            struct-with db $ :sessions $ .assoc (:sessions db) sid
               struct-with schema/session $ :id $ Option :some sid
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'app.schema/Db)
             :args $ [] 'app.schema/Db 'Unit 'Number 'String 'Number
         'disconnect $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn disconnect (db op-data sid op-id op-time)
-            struct-with db $ :sessions $ dissoc (:sessions db) sid
+            struct-with db $ :sessions $ .dissoc (:sessions db) sid
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'app.schema/Db)
             :args $ [] 'app.schema/Db 'Unit 'Number 'String 'Number
@@ -1611,8 +1623,8 @@
               get (:sessions db) sid
               (:none) db
               (:some session)
-                struct-with db $ :sessions $ assoc (:sessions db) sid
-                  struct-with session $ :messages $ dissoc (:messages session) op-data
+                struct-with db $ :sessions $ .assoc (:sessions db) sid
+                  struct-with session $ :messages $ .dissoc (:messages session) op-data
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'app.schema/Db)
             :args $ [] 'app.schema/Db 'String 'Number 'String 'Number
@@ -1639,16 +1651,16 @@
                           :return 'Bool
                         = username $ :name user
                     (:none)
-                      struct-with db $ :sessions $ assoc (:sessions db) sid
-                        struct-with session $ :messages $ assoc (:messages session) op-id
+                      struct-with db $ :sessions $ .assoc (:sessions db) sid
+                        struct-with session $ :messages $ .assoc (:messages session) op-id
                           app.schema/Message :id op-id :text $ str "|No user named: " username
                     (:some user)
                       if
                         = (md5 password) (:password user)
-                        struct-with db $ :sessions $ assoc (:sessions db) sid
+                        struct-with db $ :sessions $ .assoc (:sessions db) sid
                           struct-with session $ :user-id $ Option :some (:id user)
-                        struct-with db $ :sessions $ assoc (:sessions db) sid
-                          struct-with session $ :messages $ assoc (:messages session) op-id
+                        struct-with db $ :sessions $ .assoc (:sessions db) sid
+                          struct-with session $ :messages $ .assoc (:messages session) op-id
                             app.schema/Message :id op-id :text $ str "|Wrong password for " username
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'app.schema/Db)
@@ -1659,7 +1671,7 @@
               get (:sessions db) sid
               (:none) db
               (:some session)
-                struct-with db $ :sessions $ assoc (:sessions db) sid
+                struct-with db $ :sessions $ .assoc (:sessions db) sid
                   struct-with session $ :user-id $ Option :none
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'app.schema/Db)
@@ -1681,13 +1693,13 @@
                           :args $ [] 'app.schema/User
                           :return 'Bool
                         = username $ :name user
-                    struct-with db $ :sessions $ assoc (:sessions db) sid
-                      struct-with session $ :messages $ assoc (:messages session) op-id
+                    struct-with db $ :sessions $ .assoc (:sessions db) sid
+                      struct-with session $ :messages $ .assoc (:messages session) op-id
                         app.schema/Message :id op-id :text $ str "|Name is taken: " username
                     struct-with
-                      struct-with db $ :sessions $ assoc (:sessions db) sid
+                      struct-with db $ :sessions $ .assoc (:sessions db) sid
                         struct-with session $ :user-id $ Option :some op-id
-                      :users $ assoc (:users db) op-id $ app.schema/User :id op-id :name username :nickname (Option :some username) :password (md5 password) :avatar (Option :none)
+                      :users $ .assoc (:users db) op-id $ app.schema/User :id op-id :name username :nickname (Option :some username) :password (md5 password) :avatar (Option :none)
           :examples $ []
           :schema $ :: 'Fn $ {} (:return 'app.schema/Db)
             :args $ [] 'app.schema/Db (:: 'List 'String) 'Number 'String 'Number

@@ -73,7 +73,8 @@ jobs:
           yarn release-page
 
       - name: Upload frontend to COS and verify public files
-        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+        # Dependabot PRs cannot access Actions deployment secrets, including on reruns.
+        if: github.event_name == 'push' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]' && github.actor != 'dependabot[bot]')
         uses: worktools/cos-upload-action@06d6027dcca6413c5936e04a9b6e9f0d5ef71ba0 # v1.2.0
         with:
           source-dir: dist

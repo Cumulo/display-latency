@@ -6,7 +6,35 @@ Display Latency
 
 The time displayed is the duration between a client emits event and receives event back.
 
-### 正式 0.31.0 迁移候选：使用者影响
+### 正式 0.32.1 迁移候选：使用者影响
+
+本地与 CI 均使用正式 [Calcit CLI0.32.1](https://github.com/calcit-lang/calcit/releases/tag/0.32.1)、
+`@calcit/procs`0.32.1、Node24 和 Yarn4.18.0。前后端须一起安装完整依赖图、重启并完整刷新；
+不能让新页面连接旧后端。本候选**不合并、不部署、不发版**，生产主机是否准备好仍未确认。
+原前端 rsync 和 `/servers/display-latency/` 后端路径、main 部署条件保持。
+
+模块使用已发布精确 Git tag：Reel0.1.0、Util0.0.35、Message0.1.0、UI0.9.0、Respo0.17.1、
+JS FFI0.2.9、Recollect0.1.0、WS-EDN0.0.51、Std0.2.47、WSS0.2.40；加上传递Value0.6.0与
+UI固定的Router0.9.0-alpha.4共12模块，不单独覆盖配对图，不用main/hash或本地模块替身。
+
+只通过官方事务迁移类型标注语法；86个完整定义视图与规范化基线相同，原10项测试的
+名称、tag、断言保持。执行代码、UI/旧Op/匿名Reel操作的受检兼容入口、wire、存档、
+计时器、查询/hash保留、reload和原错误处理均未改。renderer的真实开放回调合同保留，
+其函数逆变限制已补充到[上游#2499](https://github.com/calcit-lang/calcit/issues/2499#issuecomment-6554604159)，
+不为压低Dynamic数字增加类型转接或强转；其余开放状态仍由原decoder收敛。
+
+已通过官方release binary的Caps12模块strict/toolchain、immutable、两入口普通检查与
+完整strict（空diagnostics）、公开定义browser60/60和native64/64、原10/10服务端测试、
+弃用调用0、dynamic-method0、canonical无变化和前端构建。补齐原配置缺失的60分钟npm隔离，
+lock只更新procs及其checksum/rootreference；未启用core-js安装脚本，不新增验证脚本。
+真实回环native初始patch已交给本次生成的项目decoder/apply，Unicode ping/pong通过。
+本机native副本仅追加公开WSS回环绑定参数，最终源码默认监听和生产路径未改；
+未在本机实际启动默认全网卡监听；原Linux CI继续执行两入口检查和测试，不将其声称为默认监听集成验收。
+浏览器已验证双访客与刷新重连、console warning/error=[]；登录后计时循环、清空与自动登录仍待
+本轮合成账户授权，未计为通过。本地证据不代替精确PR CI和评审，不宣称生产部署已就绪。
+
+### 0.31.0 历史迁移记录
+
 
 Calcit CLI / `@calcit/procs` 配对正式 **0.31.0**。下游依赖使用已发布的精确 tag：
 Cumulo Reel 0.1.0-alpha.2、Util 0.0.33、Message 0.1.0-alpha.3、UI 0.9.0-alpha.4、

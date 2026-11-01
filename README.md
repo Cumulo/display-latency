@@ -30,8 +30,8 @@ lock只更新procs及其checksum/rootreference；未启用core-js安装脚本，
 真实回环native初始patch已交给本次生成的项目decoder/apply，Unicode ping/pong通过。
 本机native副本仅追加公开WSS回环绑定参数，最终源码默认监听和生产路径未改；
 未在本机实际启动默认全网卡监听；原Linux CI继续执行两入口检查和测试，不将其声称为默认监听集成验收。
-浏览器已验证双访客与刷新重连、console warning/error=[]；登录后计时循环、清空与自动登录仍待
-本轮合成账户授权，未计为通过。本地证据不代替精确PR CI和评审，不宣称生产部署已就绪。
+浏览器已验证双访客与刷新重连、console warning/error=[]；获专项授权后，本轮隔离合成账户注册、
+持续延迟循环、刷新自动登录和Reset清空合成记录均通过，未保存到密码管理器。本地证据不代替精确PR CI和评审，不宣称生产部署已就绪。
 
 ### 0.31.0 历史迁移记录
 

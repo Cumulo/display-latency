@@ -6,16 +6,20 @@ Display Latency
 
 The time displayed is the duration between a client emits event and receives event back.
 
-### 正式 0.32.1 迁移候选：使用者影响
+### Calcit 0.34.3：使用者影响
 
-本地与 CI 均使用正式 [Calcit CLI0.32.1](https://github.com/calcit-lang/calcit/releases/tag/0.32.1)、
-`@calcit/procs`0.32.1、Node24 和 Yarn4.18.0。前后端须一起安装完整依赖图、重启并完整刷新；
-不能让新页面连接旧后端。本候选**不合并、不部署、不发版**，生产主机是否准备好仍未确认。
-原前端 rsync 和 `/servers/display-latency/` 后端路径、main 部署条件保持。
+本地与 CI 均使用正式 [Calcit CLI 0.34.3](https://github.com/calcit-lang/calcit/releases/tag/0.34.3)、
+`@calcit/procs` 0.34.3、Node24 和 Yarn4.18.0。前后端须一起安装完整依赖图、重启并完整刷新；
+不能让新页面连接旧后端。原前端 rsync 和 `/servers/display-latency/` 后端路径、main 部署条件保持。
 
-模块使用已发布精确 Git tag：Reel0.1.0、Util0.0.35、Message0.1.0、UI0.9.0、Respo0.17.1、
-JS FFI0.2.9、Recollect0.1.0、WS-EDN0.0.51、Std0.2.47、WSS0.2.40；加上传递Value0.6.0与
-UI固定的Router0.9.0-alpha.4共12模块，不单独覆盖配对图，不用main/hash或本地模块替身。
+模块使用已发布精确 Git tag（Respo 0.18 兼容线）：Reel 0.1.1、Util 0.0.37、Message 0.1.4、UI 0.12.1、
+Respo 0.18.1、JS FFI 0.2.9、Recollect 0.2.1、WS-EDN 0.0.53、Std 0.2.50、WSS 0.2.42；
+加上传递的 Value 0.6.3 与 Router 0.10.1 共 12 模块，不用 main/hash 或本地模块替身。
+
+0.34 的源码改动：开发用的 `comp-inspect` / `comp-reel` 子节点改成 `Option :some` / `Option :none`；
+成员列表不再把 `Map.to-list` 的 tuple 直接交给 `list->`，改为生成 `[] id element` 列表。
+
+以下为 0.32.1 迁移时的记录：
 
 只通过官方事务迁移类型标注语法；86个完整定义视图与规范化基线相同，原10项测试的
 名称、tag、断言保持。执行代码、UI/旧Op/匿名Reel操作的受检兼容入口、wire、存档、

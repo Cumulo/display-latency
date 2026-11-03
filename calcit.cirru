@@ -74,7 +74,8 @@
               (:ok action)
                 match action
                   (:states cursor state)
-                    reset! *states $ decode-map-as (update-states @*states cursor state) (:: 'Map 'Tag 'Dynamic)
+                    reset! *states $ decode-map-as (update-states @*states cursor state)
+                      quote $ Map Tag Dynamic
                   (:server op) (send-op! op)
                   (:connect) (connect! start-test-loop!)
                   (:clear)
@@ -144,7 +145,7 @@
               comp-container
                 decode-map-as
                   .unwrap $ get @*states :states
-                  :: 'Map 'Tag 'Dynamic
+                  quote $ Map Tag Dynamic
                 , @*records @*store
               , dispatch!
           :examples $ []
@@ -232,15 +233,19 @@
                         :home $ comp-home records
                         :profile $ match (:user store)
                           (:none)
-                            comp-login $ decode-map-as (>> states :login) (:: 'Map 'Tag 'Dynamic)
+                            comp-login $ decode-map-as (>> states :login)
+                              quote $ Map Tag Dynamic
                           (:some user)
                             comp-profile user $ decode-map-as
                               .unwrap $ :data router
-                              :: 'Map 'Number $ :: 'Option 'String
+                              quote $ Map Number $ Option String
                         <> $ str router
-                      comp-login $ decode-map-as (>> states :login) (:: 'Map 'Tag 'Dynamic)
+                      comp-login $ decode-map-as (>> states :login)
+                        quote $ Map Tag Dynamic
                     comp-status-color $ :color store
-                    when dev? $ comp-inspect |Store store $ {} (:bottom 0) (:left 0) (:max-width |100%)
+                    if dev?
+                      Option :some $ comp-inspect |Store store $ {} (:bottom 0) (:left 0) (:max-width |100%)
+                      Option :none
                     comp-messages
                       filter-map-kv
                         :messages $ :session store
@@ -259,7 +264,9 @@
                           decode-map-as
                             .unwrap $ get info :id
                             , 'String
-                    when dev? $ comp-reel (:reel-length store) ({})
+                    if dev?
+                      Option :some $ comp-reel (:reel-length store) ({})
+                      Option :none
           :examples $ []
           :schema $ quote $ Fn (Map Tag Dynamic) (Map String app.schema/LatencyRecord) (Option app.schema/ClientStore) (-> respo.schema/Component)
         'comp-home $ %{} 'CodeEntry (:doc |)
@@ -354,7 +361,7 @@
             let
                 cursor $ decode-map-as
                   .unwrap $ get states :cursor
-                  :: 'List 'Dynamic
+                  quote $ List Dynamic
                 state $ match (get states :data)
                   (:none) initial-state
                   (:some value)
@@ -491,15 +498,18 @@
                 =< 8 nil
                 list->
                   {} $ :style ui/row
-                  .to-list $ filter-map-kv members $ fn (id username)
-                    hint-fn $ Fn Number (Option String)
-                      -> $ MapEntryDecision Number respo.schema/Element
-                    MapEntryDecision :keep id $ div
-                      {} $ :style $ {} (:padding "|0 8px")
-                        :border $ str "|1px solid " $ hsl 0 0 80
-                        :border-radius |16px
-                        :margin "|0 4px"
-                      <> $ .unwrap-or username |Guest
+                  -> members (.to-list)
+                    .map $ fn (entry)
+                      hint-fn $ Fn
+                        Tuple Number $ Option String
+                        -> $ List Dynamic
+                      [] (nth entry 0)
+                        div
+                          {} $ :style $ {} (:padding "|0 8px")
+                            :border $ str "|1px solid " $ hsl 0 0 80
+                            :border-radius |16px
+                            :margin "|0 4px"
+                          <> $ .unwrap-or (nth entry 1) |Guest
               =< nil 48
               div ({})
                 button
@@ -545,7 +555,7 @@
     'app.config $ %{} 'FileEntry
       :defs $ {}
         'Site $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defstruct Site (:port 'Number) (:title 'String) (:icon 'String) (:theme 'String) (:storage-key 'String) (:storage-file 'String)
+          :code $ quote $ defstruct Site (:port Number) (:title String) (:icon String) (:theme String) (:storage-key String) (:storage-file String)
           :examples $ []
           :schema $ quote StructDef
         'dev? $ %{} 'CodeEntry (:doc |)
@@ -563,20 +573,20 @@
     'app.schema $ %{} 'FileEntry
       :defs $ {}
         'ClientPacket $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defenum ClientPacket (:ping 'String) (:op 'app.schema/Op)
+          :code $ quote $ defenum ClientPacket (:ping String) (:op app.schema/Op)
           :examples $ []
           :schema $ quote EnumDef
         'ClientStore $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defstruct ClientStore (:logged-in? 'Bool) (:session 'app.schema/Session)
+          :code $ quote $ defstruct ClientStore (:logged-in? Bool) (:session app.schema/Session)
             :user $ quote $ Option app.schema/ClientUser
-            :router 'app.schema/Router
-            :count 'Number
-            :color 'String
-            :reel-length 'Number
+            :router app.schema/Router
+            :count Number
+            :color String
+            :reel-length Number
           :examples $ []
           :schema $ quote StructDef
         'ClientUser $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defstruct ClientUser (:name 'String) (:id 'String)
+          :code $ quote $ defstruct ClientUser (:name String) (:id String)
             :nickname $ quote $ Option String
             :avatar $ quote $ Option String
           :examples $ []
@@ -588,32 +598,32 @@
           :examples $ []
           :schema $ quote StructDef
         'LatencyRecord $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defstruct LatencyRecord (:start-time 'Number)
+          :code $ quote $ defstruct LatencyRecord (:start-time Number)
             :finish-time $ quote $ Option Number
-            :id 'String
+            :id String
           :examples $ []
           :schema $ quote StructDef
         'LoginState $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defstruct LoginState (:username 'String) (:password 'String)
+          :code $ quote $ defstruct LoginState (:username String) (:password String)
           :examples $ []
           :schema $ quote StructDef
         'Message $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defstruct Message (:id 'String) (:text 'String)
+          :code $ quote $ defstruct Message (:id String) (:text String)
           :examples $ []
           :schema $ quote StructDef
         'Op $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defenum Op (:session/connect) (:session/disconnect) (:session/remove-message 'String) (:user/log-in 'String 'String) (:user/sign-up 'String 'String) (:user/log-out) (:router/change 'app.schema/Router) (:effect/persist) (:reel/reset) (:reel/merge)
+          :code $ quote $ defenum Op (:session/connect) (:session/disconnect) (:session/remove-message String) (:user/log-in String String) (:user/sign-up String String) (:user/log-out) (:router/change app.schema/Router) (:effect/persist) (:reel/reset) (:reel/merge)
           :examples $ []
           :schema $ quote EnumDef
         'Router $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defstruct Router (:name 'Tag)
+          :code $ quote $ defstruct Router (:name Tag)
             :title $ quote $ Option String
             :data $ quote $ Option (Map Dynamic Dynamic)
             :router $ quote $ Option app.schema/Router
           :examples $ []
           :schema $ quote StructDef
         'ServerPacket $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defenum ServerPacket (:ping 'String)
+          :code $ quote $ defenum ServerPacket (:ping String)
             :patch $ quote $ List recollect.schema/change-op
           :examples $ []
           :schema $ quote EnumDef
@@ -622,7 +632,7 @@
             :user-id $ quote $ Option String
             :id $ quote $ Option Number
             :nickname $ quote $ Option String
-            :router 'app.schema/Router
+            :router app.schema/Router
             :messages $ quote $ Map String app.schema/Message
           :examples $ []
           :schema $ quote StructDef
@@ -630,17 +640,17 @@
           :code $ quote $ defenum UiAction
             :states
               quote $ List Dynamic
-              , 'Dynamic
-            :server 'app.schema/Op
+              , Dynamic
+            :server app.schema/Op
             :connect
             :clear
           :examples $ []
           :schema $ quote EnumDef
         'User $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defstruct User (:name 'String) (:id 'String)
+          :code $ quote $ defstruct User (:name String) (:id String)
             :nickname $ quote $ Option String
             :avatar $ quote $ Option String
-            :password 'String
+            :password String
           :examples $ []
           :schema $ quote StructDef
         'apply-store-patch $ %{} 'CodeEntry (:doc |)
@@ -735,7 +745,7 @@
                 :reel/reset $ do (decode-map-as data 'Nil) (Op :reel/reset)
                 :reel/merge $ do (decode-map-as data 'Nil) (Op :reel/merge)
                 :user/log-in $ let
-                    credentials $ decode-map-as data $ :: 'List 'String
+                    credentials $ decode-map-as data $ quote (List String)
                   if
                     = 2 $ .len credentials
                     Op :user/log-in
@@ -743,7 +753,7 @@
                       .unwrap $ nth credentials 1
                     raise "|Expected two credential strings"
                 :user/sign-up $ let
-                    credentials $ decode-map-as data $ :: 'List 'String
+                    credentials $ decode-map-as data $ quote (List String)
                   if
                     = 2 $ .len credentials
                     Op :user/sign-up
@@ -767,7 +777,7 @@
                   user $ .map
                     decode-map-as
                       optional-input $ get source :user
-                      :: 'Option 'Dynamic
+                      quote $ Option Dynamic
                     , user-input
                 try-decode-map-as
                   merge source $ {}
@@ -791,7 +801,7 @@
                     .assoc source :sessions $ filter-map-kv
                       decode-map-as
                         .unwrap-or (get source :sessions) ({})
-                        :: 'Map 'Number 'Dynamic
+                        quote $ Map Number Dynamic
                       fn (key value)
                         hint-fn $ Fn Number Dynamic $ ->
                           MapEntryDecision Number $ Map Tag Dynamic
@@ -799,7 +809,7 @@
                     , :users $ filter-map-kv
                       decode-map-as
                         .unwrap-or (get source :users) ({})
-                        :: 'Map 'String 'Dynamic
+                        quote $ Map String Dynamic
                       fn (key value)
                         hint-fn $ Fn String Dynamic $ ->
                           MapEntryDecision String $ Map Tag Dynamic
@@ -867,7 +877,7 @@
                 match kind
                   :ping $ Result :ok $ ServerPacket :ping (decode-map-as data 'String)
                   :patch $ Result :ok $ ServerPacket :patch
-                    decode-map-as data $ :: 'List 'recollect.schema/change-op
+                    decode-map-as data $ quote $ List recollect.schema/change-op
                   _ $ Result :err "|Unknown server packet kind"
               fn (detail)
                 hint-fn $ Fn String $ -> (Result app.schema/ServerPacket String)
@@ -1072,7 +1082,7 @@
                 , :messages $ filter-map-kv
                   decode-map-as
                     .unwrap-or (get source :messages) ({})
-                    :: 'Map 'String 'Dynamic
+                    quote $ Map String Dynamic
                   fn (key value)
                     hint-fn $ Fn String Dynamic $ ->
                       MapEntryDecision String $ Map Tag Dynamic
@@ -1084,7 +1094,7 @@
           :code $ quote $ defn struct-input (value)
             decode-map-as
               if (struct? value) (&struct:to-map value) value
-              :: 'Map 'Tag 'Dynamic
+              quote $ Map Tag Dynamic
           :examples $ []
           :schema $ quote $ Fn Dynamic
             -> $ Map Tag Dynamic

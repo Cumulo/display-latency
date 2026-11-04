@@ -8,8 +8,8 @@
 完整依赖图、生成代码并重启/刷新。目标为 Reel0.2.0、Util0.0.38、Message0.2.1、
 UI0.14.1、Respo0.19.2、JS-FFI0.2.10、Recollect0.2.2、WS-EDN0.0.54、
 Std0.2.50、WSS0.2.42，传递 Value0.7.0 / Router0.11.2。
-Reel0.2.0 尚未正式发布；当前使用明确标记的本地候选链接验收，不能作为正式根
-Caps strict 已通过的证据，不用 main/hash 或关闭 strict 代替正式 tag。
+Reel0.2.0 已正式发布；已从发布 tag 完成正式根 Caps strict/toolchain 校验。12 个模块
+的 Snapshot 与实际验收候选字节相同，不用 main/hash 或关闭 strict 代替正式 tag。
 
 9 处 DOM 提示改用 RespoEvent，两个输入按名义字段读取并保留 String decoder。
 on-submit 返回具体事件签名，renderer 回调收紧为原有 UiAction；组件构建与实际
@@ -24,7 +24,7 @@ reload 和错误展示保持。前端 COS 只上传 dist，原前端 rsync 与
 ## 开发
 
 `calcit.cirru` 是唯一项目 Snapshot，`deps.cirru` 声明精确依赖，不使用
-`compact.cirru` / `package.cirru`。待 Reel 正式 tag 后安装整图：
+`compact.cirru` / `package.cirru`。按发布 tag 安装完整依赖图：
 
 ```sh
 corepack enable
@@ -59,7 +59,7 @@ calcit --entry server test --tag server --require-match
 公开decoder/apply，Unicode ping/pong通过；实际访客输入、导航和刷新重连无控制台错误。
 仅在临时Snapshot副本追加官方WSS回环绑定字符串，原源码默认监听保持。
 本轮未做登录后完整延迟循环、账户/存档恢复或默认全网卡监听验收，不沿用历史结果
-冒充当前完整部署许可。正式根依赖与精确远端CI仍待Reel发布，不合并部署本应用。
+冒充当前完整部署许可。正式根依赖已解析，精确远端 CI 仍须完成；不合并部署本应用。
 
 服务端的 storage.cirru 和原备份布局保持。升级运行中的服务前，安装匹配的 CLI、
 模块及 native 库并验证隔离数据副本，不能只因前端 COS 校验成功就部署后端。

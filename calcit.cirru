@@ -141,7 +141,7 @@
           :schema $ quote $ Fn (-> Unit)
         'render-app! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-app! (renderer)
-            renderer (mount-target)
+            with-memo-frame $ fn () $ renderer (mount-target)
               comp-container
                 decode-map-as
                   .unwrap $ get @*states :states
@@ -151,7 +151,7 @@
           :examples $ []
           :schema $ quote $ Fn
             Fn (JsNullish respo.dom/DomElement) respo.schema/Component
-              Fn Dynamic $ -> Unit
+              Fn app.schema/UiAction $ -> Unit
               -> Unit
             -> Unit
         'send-op! $ %{} 'CodeEntry (:doc |)
@@ -216,6 +216,7 @@
             cumulo-util.core :refer $ on-page-touch
             js-ffi.browser :as browser
             js-ffi.shared :as shared
+            respo.memo :refer $ with-memo-frame
     'app.comp.container $ %{} 'FileEntry
       :defs $ {}
         'comp-container $ %{} 'CodeEntry (:doc |)
@@ -287,7 +288,7 @@
                         <>
                           str $ :start-time record
                           {} $ :font-family ui/font-code
-                        =< 16 nil
+                        space-x 16
                         match (:finish-time record)
                           (:none) (<> |...)
                           (:some finish)
@@ -300,7 +301,7 @@
                 {} $ :style $ {} (:padding 16)
                 button $ {} (:style ui/button) (:inner-text |Reset)
                   :on-click $ fn (e d!)
-                    hint-fn $ Fn (Map Tag Dynamic)
+                    hint-fn $ Fn respo.schema/RespoEvent
                       Fn app.schema/UiAction $ -> Unit
                       -> Unit
                     d! $ schema/UiAction :clear
@@ -323,7 +324,7 @@
                 {}
                   :style $ {} (:cursor :pointer) (:line-height |32px)
                   :on-click $ fn (e d!)
-                    hint-fn $ Fn (Map Tag Dynamic)
+                    hint-fn $ Fn respo.schema/RespoEvent
                       Fn app.schema/UiAction $ -> Unit
                       -> Unit
                     d! $ schema/UiAction :connect
@@ -345,7 +346,7 @@
             respo-ui.core :as ui
             respo.core :refer $ defcomp <> >> div list-> span button pre
             respo.comp.inspect :refer $ comp-inspect
-            respo.comp.space :refer $ =<
+            respo.comp.space :refer $ space-x space-y
             app.comp.navigation :refer $ comp-navigation
             app.comp.profile :refer $ comp-profile
             app.comp.login :refer $ comp-login
@@ -376,33 +377,29 @@
                         :value $ :username state
                         :style ui/input
                         :on-input $ fn (e d!)
-                          hint-fn $ Fn (Map Tag Dynamic)
+                          hint-fn $ Fn respo.schema/RespoEvent
                             Fn app.schema/UiAction $ -> Unit
                             -> Unit
                           d! $ schema/UiAction :states cursor $ struct-with state
-                            :username $ decode-map-as
-                              .unwrap $ get e :value
-                              , 'String
-                    =< nil 8
+                            :username $ decode-map-as (:value e) 'String
+                    space-y 8
                     div ({})
                       input $ {} (:placeholder |Password)
                         :value $ :password state
                         :style ui/input
                         :on-input $ fn (e d!)
-                          hint-fn $ Fn (Map Tag Dynamic)
+                          hint-fn $ Fn respo.schema/RespoEvent
                             Fn app.schema/UiAction $ -> Unit
                             -> Unit
                           d! $ schema/UiAction :states cursor $ struct-with state
-                            :password $ decode-map-as
-                              .unwrap $ get e :value
-                              , 'String
-                  =< nil 8
+                            :password $ decode-map-as (:value e) 'String
+                  space-y 8
                   div
                     {} $ :style $ {} (:text-align :right)
                     span $ {} (:inner-text "|Sign up")
                       :style $ merge ui/link
                       :on-click $ on-submit (:username state) (:password state) true
-                    =< 8 nil
+                    space-x 8
                     span $ {} (:inner-text "|Log in")
                       :style $ merge ui/link
                       :on-click $ on-submit (:username state) (:password state) false
@@ -415,7 +412,7 @@
         'on-submit $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn on-submit (username password signup?)
             fn (e dispatch!)
-              hint-fn $ Fn (Map Tag Dynamic)
+              hint-fn $ Fn respo.schema/RespoEvent
                 Fn app.schema/UiAction $ -> Unit
                 -> Unit
               dispatch! $ if signup?
@@ -426,14 +423,14 @@
               , &unit
           :examples $ []
           :schema $ quote $ Fn String String Bool
-            -> $ Fn (Map Tag Dynamic)
+            -> $ Fn respo.schema/RespoEvent
               Fn app.schema/UiAction $ -> Unit
               -> Unit
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.comp.login
           :require
             respo.core :refer $ defcomp <> div input button span
-            respo.comp.space :refer $ =<
+            respo.comp.space :refer $ space-x space-y
             respo.comp.inspect :refer $ comp-inspect
             respo-ui.core :as ui
             app.schema :as schema
@@ -451,24 +448,24 @@
               div
                 {}
                   :on-click $ fn (e d!)
-                    hint-fn $ Fn (Map Tag Dynamic)
+                    hint-fn $ Fn respo.schema/RespoEvent
                       Fn app.schema/UiAction $ -> Unit
                       -> Unit
                     d! $ schema/UiAction :server $ schema/Op :router/change
                       struct-with schema/router $ :name :home
                   :style $ {} $ :cursor :pointer
-                <> (:title config/site) nil
+                <> $ :title config/site
               div
                 {}
                   :style $ {} $ :cursor |pointer
                   :on-click $ fn (e d!)
-                    hint-fn $ Fn (Map Tag Dynamic)
+                    hint-fn $ Fn respo.schema/RespoEvent
                       Fn app.schema/UiAction $ -> Unit
                       -> Unit
                     d! $ schema/UiAction :server $ schema/Op :router/change
                       struct-with schema/router $ :name :profile
                 <> $ if logged-in? |Me |Guest
-                =< 8 nil
+                space-x 8
                 <> $ str count-members
           :examples $ []
           :schema $ quote $ Fn Bool Number (-> respo.schema/Component)
@@ -477,7 +474,7 @@
           :require
             respo-ui.core :refer $ hsl
             respo-ui.core :as ui
-            respo.comp.space :refer $ =<
+            respo.comp.space :refer $ space-x space-y
             respo.core :refer $ defcomp <> span div
             app.config :as config
             app.schema :as schema
@@ -491,11 +488,11 @@
               div
                 {} $ :style $ {} (:font-family ui/font-fancy) (:font-size 32) (:font-weight 100)
                 <> $ str "|Hello! " $ :name user
-              =< nil 16
+              space-y 16
               div
                 {} $ :style ui/row
                 <> |Members:
-                =< 8 nil
+                space-x 8
                 list->
                   {} $ :style ui/row
                   -> members (.to-list)
@@ -510,13 +507,13 @@
                             :border-radius |16px
                             :margin "|0 4px"
                           <> $ .unwrap-or (nth entry 1) |Guest
-              =< nil 48
+              space-y 48
               div ({})
                 button
                   {}
                     :style $ merge ui/button
                     :on-click $ fn (e d!)
-                      hint-fn $ Fn (Map Tag Dynamic)
+                      hint-fn $ Fn respo.schema/RespoEvent
                         Fn app.schema/UiAction $ -> Unit
                         -> Unit
                       let
@@ -525,12 +522,12 @@
                         shared/search-params-set! query |time $ str $ shared/now-ms
                         browser/location-replace! $ str (:origin location) (:pathname location) |? (shared/search-params-string query) (:hash location)
                   <> |Refresh
-                =< 8 nil
+                space-x 8
                 button
                   {}
                     :style $ merge ui/button $ {} (:color :red) (:border-color :red)
                     :on-click $ fn (e dispatch!)
-                      hint-fn $ Fn (Map Tag Dynamic)
+                      hint-fn $ Fn respo.schema/RespoEvent
                         Fn app.schema/UiAction $ -> Unit
                         -> Unit
                       dispatch! $ schema/UiAction :server $ schema/Op :user/log-out
@@ -548,7 +545,7 @@
             app.schema :as schema
             respo-ui.core :as ui
             respo.core :refer $ defcomp list-> <> span div button
-            respo.comp.space :refer $ =<
+            respo.comp.space :refer $ space-x space-y
             app.config :as config
             js-ffi.browser :as browser
             js-ffi.shared :as shared

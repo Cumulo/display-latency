@@ -23,6 +23,10 @@ reload 和错误展示保持。前端 COS 只上传 dist，原前端 rsync 与
 
 ## 开发
 
+先安装正式 Calcit 0.34.3，并按 [Caps 官方说明](https://github.com/calcit-lang/caps)
+独立安装与 CI 一致的 Caps 0.1.1：`cargo install calcit-caps --version 0.1.1 --locked`。
+确认 `calcit` 与 `caps` 位于 PATH；Corepack/Yarn 不会安装 Caps。
+
 `calcit.cirru` 是唯一项目 Snapshot，`deps.cirru` 声明精确依赖，不使用
 `compact.cirru` / `package.cirru`。按发布 tag 安装完整依赖图：
 

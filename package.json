@@ -16,7 +16,7 @@
   "author": "jiyinyiyong",
   "license": "MIT",
   "dependencies": {
-    "@calcit/procs": "0.34.3",
+    "@calcit/procs": "0.38.0",
     "bottom-tip": "0.1.5"
   },
   "devDependencies": {

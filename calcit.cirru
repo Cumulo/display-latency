@@ -473,14 +473,14 @@
                 {} $ :style ui/row
                 <> |Members:
                 space-x 8
-                list->
+                keyed->
                   {} $ :style ui/row
                   -> members (.to-list)
                     .map $ fn (entry)
                       hint-fn $ Fn
                         Tuple Number $ Option String
-                        -> $ List Dynamic
-                      [] (nth entry 0)
+                        -> respo.schema/ChildPair
+                      keyed-element (nth entry 0)
                         div
                           {} $ :style $ {} (:padding "|0 8px")
                             :border $ str "|1px solid " $ hsl 0 0 80
@@ -524,7 +524,7 @@
             respo-ui.core :refer $ hsl
             app.schema :as schema
             respo-ui.core :as ui
-            respo.core :refer $ defcomp list-> <> span div button
+            respo.core :refer $ defcomp keyed-> keyed-element <> span div button
             respo.comp.space :refer $ space-x space-y
             app.config :as config
             js-ffi.browser :as browser
@@ -1255,6 +1255,7 @@
           :code $ quote $ defn sync-clients! (reel)
             let
                 db $ :db reel
+                reel-length $ .len $ :records reel
                 complete? $ ref true
               wss-each! $ fn (sid)
                 hint-fn $ Fn Number $ -> Unit
@@ -1263,7 +1264,7 @@
                   (:none) &unit
                   (:some session)
                     let
-                        new-store $ twig-container db session $ :records reel
+                        new-store $ twig-container db session reel-length
                         options $ {} $ :key :id
                         changes $ match (get @*client-caches sid)
                           (:some value) (diff-twig value new-store options)
@@ -1300,7 +1301,7 @@
     'app.twig.container $ %{} 'FileEntry
       :defs $ {}
         'twig-container $ %{} 'CodeEntry (:doc |)
-          :code $ quote $ defn twig-container (db session records)
+          :code $ quote $ defn twig-container (db session reel-length)
             let
                 logged-in? $ .some? $ :user-id session
               schema/ClientStore :logged-in? logged-in? :session session :user
@@ -1321,11 +1322,9 @@
                       Option :none
                   , :count
                     .len $ :sessions db
-                    , :color (rand-hex-color!) :reel-length $ .len records
+                    , :color (rand-hex-color!) :reel-length reel-length
           :examples $ []
-          :schema $ quote $ Fn app.schema/Db app.schema/Session
-            List $ List Dynamic
-            -> app.schema/ClientStore
+          :schema $ quote $ Fn app.schema/Db app.schema/Session Number (-> app.schema/ClientStore)
           :tests $ [] $ %{} 'TestEntry (:name |publishes-account-without-password)
             :code $ quote $ let
                 db $ app.updater/updater
@@ -1333,7 +1332,7 @@
                   schema/Op :user/sign-up |demo |pw
                   , 1 |u1 0
                 session $ .unwrap $ get (:sessions db) 1
-                store $ twig-container db session $ []
+                store $ twig-container db session 7
                 user $ .unwrap $ :user store
               assert= true $ :logged-in? store
               assert= |demo $ :name user
@@ -1343,6 +1342,7 @@
                 twig-members (:sessions db) (:users db)
               assert= (Option :none)
                 :data $ :router store
+              assert= 7 $ :reel-length store
             :tags $ #{} :server
         'twig-members $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn twig-members (sessions users)

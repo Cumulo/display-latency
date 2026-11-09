@@ -2,28 +2,18 @@
 
 展示浏览器与原生服务之间的往返延迟。
 
-## 0.2.0 候选：使用者影响
+## Calcit 0.38.0 升级
 
-使用正式 CLI / `@calcit/procs` **0.34.3**、Node24 和 Yarn4.18.0，前后端须同步
-完整依赖图、生成代码并重启/刷新。目标为 Reel0.2.0、Util0.0.38、Message0.2.1、
-UI0.14.1、Respo0.19.2、JS-FFI0.2.10、Recollect0.2.2、WS-EDN0.0.54、
-Std0.2.50、WSS0.2.42，传递 Value0.7.0 / Router0.11.2。
-Reel0.2.0 已正式发布；已从发布 tag 完成正式根 Caps strict/toolchain 校验。12 个模块
-的 Snapshot 与实际验收候选字节相同，不用 main/hash 或关闭 strict 代替正式 tag。
+前端与原生服务使用 Calcit 0.38.0。升级现有实例时，按 `deps.cirru` 安装完整依赖图，
+重新构建前端并重启服务。现有 WebSocket 封包、账户存档和部署路径可继续使用。
 
-9 处 DOM 提示改用 RespoEvent，两个输入按名义字段读取并保留 String decoder。
-on-submit 返回具体事件签名，renderer 回调收紧为原有 UiAction；组件构建与实际
-render/SSR 同处 managed memo frame。9 个 spacer 保持原宽高，一处 nil 文本样式
-省略为默认值。原86个定义、原10项附带测试及断言保留，只改7个代码体、5个导入、
-2个schema；不增加强转、checker、脚本或放宽类型门禁。
-
-原 UI/旧 Op/匿名 Reel 操作的受检兼容入口、wire、存档、计时器、查询/hash、
-reload 和错误展示保持。前端 COS 只上传 dist，原前端 rsync 与
-`/servers/display-latency/` 后端路径、main 部署条件不改。
+登录表单直接使用 `LoginState`，应用分发接收 `UiAction`，延迟列表使用 Respo
+的 `ChildPair` 保留每行的稳定键。首次同步没有旧快照时，在 Recollect 调用处
+传入协议所需的 `nil`。服务端也在解析入口保留无载荷操作的原有表示。
 
 ## 开发
 
-先安装正式 Calcit 0.34.3，并按 [Caps 官方说明](https://github.com/calcit-lang/caps)
+先安装正式 Calcit 0.38.0，并按 [Caps 官方说明](https://github.com/calcit-lang/caps)
 独立安装与 CI 一致的 Caps 0.1.1：`cargo install calcit-caps --version 0.1.1 --locked`。
 确认 `calcit` 与 `caps` 位于 PATH；Corepack/Yarn 不会安装 Caps。
 
@@ -57,13 +47,6 @@ calcit fix --workflow strict --verify
 calcit --entry server fix --workflow strict --verify
 calcit --entry server test --tag server --require-match
 ```
-
-当前候选图双入口完整 strict（diagnostics为空）、原10项server、JS/Vite构建及
-双入口 dynamic-method/deprecated 为0。隔离原生服务的初始patch已通过当前客户端
-公开decoder/apply，Unicode ping/pong通过；实际访客输入、导航和刷新重连无控制台错误。
-仅在临时Snapshot副本追加官方WSS回环绑定字符串，原源码默认监听保持。
-本轮未做登录后完整延迟循环、账户/存档恢复或默认全网卡监听验收，不沿用历史结果
-冒充当前完整部署许可。正式根依赖已解析，精确远端 CI 仍须完成；不合并部署本应用。
 
 服务端的 storage.cirru 和原备份布局保持。升级运行中的服务前，安装匹配的 CLI、
 模块及 native 库并验证隔离数据副本，不能只因前端 COS 校验成功就部署后端。

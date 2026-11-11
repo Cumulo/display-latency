@@ -87,13 +87,13 @@
             render-app!
             connect! $ fn () $ start-test-loop!
             add-watch! *store :changes $ fn (current previous)
-              hint-fn $ Fn (Option app.schema/ClientStore) (Option app.schema/ClientStore) (-> Unit)
+              hint-fn $ Fn (Option schema/ClientStore) (Option schema/ClientStore) (-> Unit)
               render-app!
             add-watch! *login-state :changes $ fn (current previous)
-              hint-fn $ Fn app.schema/LoginState app.schema/LoginState $ -> Unit
+              hint-fn $ Fn schema/LoginState schema/LoginState $ -> Unit
               render-app!
             add-watch! *records :changes $ fn (current previous)
-              hint-fn $ Fn (Map String app.schema/LatencyRecord) (Map String app.schema/LatencyRecord) (-> Unit)
+              hint-fn $ Fn (Map String schema/LatencyRecord) (Map String schema/LatencyRecord) (-> Unit)
               render-app!
             on-page-touch $ fn ()
               hint-fn $ Fn $ -> Unit
@@ -120,8 +120,8 @@
                   (:err detail) (println "|Rejected store patch:" detail)
               (:ping id)
                 swap! *records $ fn (records)
-                  hint-fn $ Fn (Map String app.schema/LatencyRecord)
-                    -> $ Map String app.schema/LatencyRecord
+                  hint-fn $ Fn (Map String schema/LatencyRecord)
+                    -> $ Map String schema/LatencyRecord
                   match (get records id)
                     (:none) records
                     (:some record)
@@ -241,7 +241,7 @@
                       filter-map-kv
                         :messages $ :session store
                         fn (id message)
-                          hint-fn $ Fn String app.schema/Message $ ->
+                          hint-fn $ Fn String schema/Message $ ->
                             MapEntryDecision String $ Map Tag String
                           MapEntryDecision :keep id $ {}
                             :id $ :id message
@@ -249,7 +249,7 @@
                       {}
                       fn (info d!)
                         hint-fn $ Fn (Map Tag Dynamic)
-                          Fn app.schema/UiAction $ -> Unit
+                          Fn schema/UiAction $ -> Unit
                           -> Unit
                         d! $ schema/UiAction :server $ schema/Op :session/remove-message
                           decode-map-as
@@ -269,10 +269,10 @@
                   {} (:padding 16) (:max-width 320)
                 -> records (.distinct-values) (.to-list)
                   .sort-by $ fn (record)
-                    hint-fn $ Fn app.schema/LatencyRecord $ -> Number
+                    hint-fn $ Fn schema/LatencyRecord $ -> Number
                     negate $ :start-time record
                   .map $ fn (record)
-                    hint-fn $ Fn app.schema/LatencyRecord $ -> respo.schema/ChildPair
+                    hint-fn $ Fn schema/LatencyRecord $ -> respo.schema/ChildPair
                     keyed-element (:id record)
                       div ({})
                         <>
@@ -292,7 +292,7 @@
                 button $ {} (:style ui/button) (:inner-text |Reset)
                   :on-click $ fn (e d!)
                     hint-fn $ Fn respo.schema/RespoEvent
-                      Fn app.schema/UiAction $ -> Unit
+                      Fn schema/UiAction $ -> Unit
                       -> Unit
                     d! $ schema/UiAction :clear
           :examples $ []
@@ -315,7 +315,7 @@
                   :style $ {} (:cursor :pointer) (:line-height |32px)
                   :on-click $ fn (e d!)
                     hint-fn $ Fn respo.schema/RespoEvent
-                      Fn app.schema/UiAction $ -> Unit
+                      Fn schema/UiAction $ -> Unit
                       -> Unit
                     d! $ schema/UiAction :connect
                 <> "|No connection..." $ {} (:font-family ui/font-fancy) (:font-size 24)
@@ -360,7 +360,7 @@
                       :style ui/input
                       :on-input $ fn (e d!)
                         hint-fn $ Fn respo.schema/RespoEvent
-                          Fn app.schema/UiAction $ -> Unit
+                          Fn schema/UiAction $ -> Unit
                           -> Unit
                         d! $ schema/UiAction :login-state $ struct-with state
                           :username $ decode-map-as (:value e) 'String
@@ -371,7 +371,7 @@
                       :style ui/input
                       :on-input $ fn (e d!)
                         hint-fn $ Fn respo.schema/RespoEvent
-                          Fn app.schema/UiAction $ -> Unit
+                          Fn schema/UiAction $ -> Unit
                           -> Unit
                         d! $ schema/UiAction :login-state $ struct-with state
                           :password $ decode-map-as (:value e) 'String
@@ -395,7 +395,7 @@
           :code $ quote $ defn on-submit (username password signup?)
             fn (e dispatch!)
               hint-fn $ Fn respo.schema/RespoEvent
-                Fn app.schema/UiAction $ -> Unit
+                Fn schema/UiAction $ -> Unit
                 -> Unit
               dispatch! $ if signup?
                 schema/UiAction :server $ schema/Op :user/sign-up username password
@@ -431,7 +431,7 @@
                 {}
                   :on-click $ fn (e d!)
                     hint-fn $ Fn respo.schema/RespoEvent
-                      Fn app.schema/UiAction $ -> Unit
+                      Fn schema/UiAction $ -> Unit
                       -> Unit
                     d! $ schema/UiAction :server $ schema/Op :router/change
                       struct-with schema/router $ :name :home
@@ -442,7 +442,7 @@
                   :style $ {} $ :cursor |pointer
                   :on-click $ fn (e d!)
                     hint-fn $ Fn respo.schema/RespoEvent
-                      Fn app.schema/UiAction $ -> Unit
+                      Fn schema/UiAction $ -> Unit
                       -> Unit
                     d! $ schema/UiAction :server $ schema/Op :router/change
                       struct-with schema/router $ :name :profile
@@ -496,7 +496,7 @@
                     :style $ merge ui/button
                     :on-click $ fn (e d!)
                       hint-fn $ Fn respo.schema/RespoEvent
-                        Fn app.schema/UiAction $ -> Unit
+                        Fn schema/UiAction $ -> Unit
                         -> Unit
                       let
                           location $ browser/location-snapshot
@@ -510,7 +510,7 @@
                     :style $ merge ui/button $ {} (:color :red) (:border-color :red)
                     :on-click $ fn (e dispatch!)
                       hint-fn $ Fn respo.schema/RespoEvent
-                        Fn app.schema/UiAction $ -> Unit
+                        Fn schema/UiAction $ -> Unit
                         -> Unit
                       dispatch! $ schema/UiAction :server $ schema/Op :user/log-out
                       browser/storage-remove! $ :storage-key config/site
@@ -641,7 +641,7 @@
           :tests $ [] $ %{} 'TestEntry (:name |roundtrips-initial-and-profile-wire-patches)
             :code $ quote $ let
                 receive $ fn (store text)
-                  hint-fn $ Fn (Option app.schema/ClientStore) String $ -> (Result app.schema/ClientStore String)
+                  hint-fn $ Fn (Option ClientStore) String $ -> (Result ClientStore String)
                   match
                     decode-server-packet $ parse-cirru-edn text client-wire-classes
                     (:err detail) (Result :err detail)
@@ -703,8 +703,9 @@
                     Result :err "|Expected an owned Op enum"
               Result :err "|Expected an operation enum"
           :examples $ []
-          :schema $ quote $ Fn Dynamic
+          :schema $ quote $ Fn Input
             -> $ Result Op String
+            :generics Input
         'decode-client-op $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn decode-client-op (tag data)
             try
@@ -735,7 +736,7 @@
                 :router/change $ Op :router/change $ decode-map-as (router-input data) 'app.schema/Router
                 _ $ raise $ str "|Unknown client operation: " tag
               fn (detail)
-                hint-fn $ Fn String $ -> (Result app.schema/Op String)
+                hint-fn $ Fn String $ -> (Result Op String)
                 Result :err detail
           :examples $ []
           :schema $ quote $ Fn Tag Dynamic
@@ -757,11 +758,12 @@
                     :user user
                   , 'app.schema/ClientStore
               fn (detail)
-                hint-fn $ Fn String $ -> (Result app.schema/ClientStore String)
+                hint-fn $ Fn String $ -> (Result ClientStore String)
                 Result :err detail
           :examples $ []
-          :schema $ quote $ Fn Dynamic
+          :schema $ quote $ Fn Input
             -> $ Result ClientStore String
+            :generics Input
         'decode-database $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn decode-database (value)
             try
@@ -787,11 +789,12 @@
                         MapEntryDecision :keep key $ user-input value
                   , 'app.schema/Db
               fn (detail)
-                hint-fn $ Fn String $ -> (Result app.schema/Db String)
+                hint-fn $ Fn String $ -> (Result Db String)
                 Result :err detail
           :examples $ []
-          :schema $ quote $ Fn Dynamic
+          :schema $ quote $ Fn Input
             -> $ Result Db String
+            :generics Input
           :tests $ []
             %{} 'TestEntry (:name |decodes-legacy-bare-maps)
               :code $ quote $ match
@@ -850,11 +853,12 @@
                     decode-map-as data $ List recollect.schema/change-op
                   _ $ Result :err "|Unknown server packet kind"
               fn (detail)
-                hint-fn $ Fn String $ -> (Result app.schema/ServerPacket String)
+                hint-fn $ Fn String $ -> (Result ServerPacket String)
                 Result :err detail
           :examples $ []
-          :schema $ quote $ Fn Dynamic
+          :schema $ quote $ Fn Input
             -> $ Result ServerPacket String
+            :generics Input
         'decode-ui-action $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn decode-ui-action (value)
             if (enum? value)
@@ -874,19 +878,20 @@
                       (:server op)
                         .map (decode-action-op op)
                           fn (op)
-                            hint-fn $ Fn app.schema/Op $ -> app.schema/UiAction
+                            hint-fn $ Fn Op $ -> UiAction
                             UiAction :server op
                       _ $ try-decode-map-as value 'app.schema/UiAction
                     if (= definition Op)
                       .map (decode-action-op value)
                         fn (op)
-                          hint-fn $ Fn app.schema/Op $ -> app.schema/UiAction
+                          hint-fn $ Fn Op $ -> UiAction
                           UiAction :server op
                       Result :err "|Unknown UI action enum"
               Result :err "|Expected an action enum"
           :examples $ []
-          :schema $ quote $ Fn Dynamic
+          :schema $ quote $ Fn Input
             -> $ Result UiAction String
+            :generics Input
           :tests $ [] $ %{} 'TestEntry (:name |routes-concrete-router-actions)
             :code $ quote $ let
                 router $ struct-with app.schema/router $ :name :profile
@@ -959,7 +964,7 @@
                       (:err detail) (Result :err detail)
                   _ $ Result :err "|Unknown client packet kind"
               fn (detail)
-                hint-fn $ Fn String $ -> (Result app.schema/ClientPacket String)
+                hint-fn $ Fn String $ -> (Result ClientPacket String)
                 Result :err detail
           :examples $ []
           :schema $ quote $ Fn String
@@ -998,7 +1003,7 @@
               decode-database $ parse-cirru-edn text $ {} (:Option Option)
                 :Message $ Message :id | :text |
               fn (detail)
-                hint-fn $ Fn String $ -> (Result app.schema/Db String)
+                hint-fn $ Fn String $ -> (Result Db String)
                 Result :err detail
           :examples $ []
           :schema $ quote $ Fn String
@@ -1347,14 +1352,14 @@
         'twig-members $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn twig-members (sessions users)
             filter-map-kv sessions $ fn (sid session)
-              hint-fn $ Fn Number app.schema/Session $ ->
+              hint-fn $ Fn Number schema/Session $ ->
                 MapEntryDecision Number $ Option String
               MapEntryDecision :keep sid $ match (:user-id session)
                 (:none) None
                 (:some id)
                   .map (get users id)
                     fn (user)
-                      hint-fn $ Fn app.schema/User $ -> String
+                      hint-fn $ Fn schema/User $ -> String
                       :name user
           :examples $ []
           :schema $ quote $ Fn (Map Number schema/Session) (Map String schema/User)

@@ -2,9 +2,9 @@
 
 展示浏览器与原生服务之间的往返延迟。
 
-## Calcit 0.40.0 升级
+## Calcit 0.41.0 升级
 
-前端与原生服务使用 Calcit 0.40.0。升级现有实例时，按 `deps.cirru` 安装完整依赖图，
+前端与原生服务使用 Calcit 0.41.0。升级现有实例时，按 `deps.cirru` 安装完整依赖图，
 重新构建前端并重启服务。现有 WebSocket 封包、账户存档和部署路径可继续使用。服务端依赖 WSS 0.2.45 与 Std 0.2.54。
 
 登录表单直接使用 `LoginState`，应用分发接收 `UiAction`，延迟列表使用 Respo
@@ -13,7 +13,7 @@
 
 ## 开发
 
-先安装正式 Calcit 0.40.0，并按 [Caps 官方说明](https://github.com/calcit-lang/caps)
+先安装正式 Calcit 0.41.0，并按 [Caps 官方说明](https://github.com/calcit-lang/caps)
 独立安装与 CI 一致的 Caps 0.1.1：`cargo install calcit-caps --version 0.1.1 --locked`。
 确认 `calcit` 与 `caps` 位于 PATH；Corepack/Yarn 不会安装 Caps。
 

@@ -70,6 +70,7 @@
           :schema $ quote $ Fn
             Fn $ -> Unit
             -> Unit
+            :features :io :state
         'dispatch! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn dispatch! (action)
             match action
@@ -80,7 +81,7 @@
                 reset! *records $ {}
             , &unit
           :examples $ []
-          :schema $ quote $ Fn schema/UiAction (-> Unit)
+          :schema $ quote $ Fn schema/UiAction (-> Unit) (:features :io :state)
         'main! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn main! ()
             println "|Running mode:" $ if config/dev? |dev |release
@@ -101,7 +102,7 @@
               , &unit
             println "|App started!"
           :examples $ []
-          :schema $ quote $ Fn (-> Unit)
+          :schema $ quote $ Fn (-> Unit) (:features :io :state)
         'mount-target $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn mount-target ()
             let
@@ -129,11 +130,11 @@
                         Some $ checked-now-ms
             , &unit
           :examples $ []
-          :schema $ quote $ Fn schema/ServerPacket (-> Unit)
+          :schema $ quote $ Fn schema/ServerPacket (-> Unit) (:features :io :state)
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! () (clear-cache!) (render-app!) (println "|Code updated.") &unit
           :examples $ []
-          :schema $ quote $ Fn (-> Unit)
+          :schema $ quote $ Fn (-> Unit) (:features :io :state)
         'render-app! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-app! ()
             render-with! (mount-target)
@@ -147,7 +148,7 @@
                   (:ok action) (dispatch! action)
                 , &unit
           :examples $ []
-          :schema $ quote $ Fn (-> Unit)
+          :schema $ quote $ Fn (-> Unit) (:features :io :state)
         'send-op! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn send-op! (op)
             ws-send! $ schema/op-wire op
@@ -165,7 +166,7 @@
                   (:err detail) (println "|Rejected stored credentials:" detail)
             , &unit
           :examples $ []
-          :schema $ quote $ Fn (-> Unit)
+          :schema $ quote $ Fn (-> Unit) (:features :io)
         'start-test-loop! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn start-test-loop! () (stop-test-loop!)
             reset! *ping-timer $ Some $ browser/set-interval!
@@ -186,7 +187,7 @@
               , 2000
             , &unit
           :examples $ []
-          :schema $ quote $ Fn (-> Unit)
+          :schema $ quote $ Fn (-> Unit) (:features :state)
         'stop-test-loop! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn stop-test-loop! ()
             match @*ping-timer
@@ -195,7 +196,7 @@
             reset! *ping-timer None
             , &unit
           :examples $ []
-          :schema $ quote $ Fn (-> Unit)
+          :schema $ quote $ Fn (-> Unit) (:features :state)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.client
           :require
@@ -1066,16 +1067,18 @@
                       MapEntryDecision String $ Map Tag Dynamic
                     MapEntryDecision :keep key $ struct-input value
           :examples $ []
-          :schema $ quote $ Fn Dynamic
+          :schema $ quote $ Fn Input
             -> $ Map Tag Dynamic
+            :generics Input
         'struct-input $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn struct-input (value)
             decode-map-as
               if (struct? value) (&struct:to-map value) value
               Map Tag Dynamic
           :examples $ []
-          :schema $ quote $ Fn Dynamic
+          :schema $ quote $ Fn Input
             -> $ Map Tag Dynamic
+            :generics Input
         'user $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def user
             User :name | :id | :nickname None :avatar None :password |
@@ -1142,7 +1145,7 @@
                 _ $ reset! *reel $ reel-reducer @*reel updater op sid op-id op-time config/dev?
               , &unit
           :examples $ []
-          :schema $ quote $ Fn schema/Op Number (-> Unit)
+          :schema $ quote $ Fn schema/Op Number (-> Unit) (:features :io :state)
         'get-backup-path! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn get-backup-path! ()
             let
@@ -1173,11 +1176,11 @@
             on-control-c on-exit!
             , &unit
           :examples $ []
-          :schema $ quote $ Fn (-> Unit)
+          :schema $ quote $ Fn (-> Unit) (:features :io :state)
         'on-exit! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn on-exit! () (persist-db!) (; println "|exit code is...") (quit! 0)
           :examples $ []
-          :schema $ quote $ Fn (-> Unit)
+          :schema $ quote $ Fn (-> Unit) (:features :io :state)
         'persist-db! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn persist-db! ()
             let
@@ -1189,7 +1192,7 @@
               check-write-file! backup-path file-content
               , &unit
           :examples $ []
-          :schema $ quote $ Fn (-> Unit)
+          :schema $ quote $ Fn (-> Unit) (:features :state)
         'reload! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn reload! () (println "|Code updated..")
             if (not config/dev?) (raise "|reloading only happens in dev mode")
@@ -1197,7 +1200,7 @@
             reset! *reel $ refresh-reel @*reel @*initial-db replay-updater
             render-loop!
           :examples $ []
-          :schema $ quote $ Fn (-> Unit)
+          :schema $ quote $ Fn (-> Unit) (:features :io :state)
         'render-loop! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn render-loop! ()
             let
@@ -1207,7 +1210,7 @@
                 when (sync-clients! reel) (reset! *reader-reel reel)
             , &unit
           :examples $ []
-          :schema $ quote $ Fn (-> Unit)
+          :schema $ quote $ Fn (-> Unit) (:features :io :state)
         'replay-updater $ %{} 'CodeEntry
           :doc "|Checked adapter for Reel's heterogeneous recorded payload boundary. Business updater retains concrete Op, Number session id, String operation id and Number timestamp."
           :code $ quote $ defn replay-updater (db op sid op-id op-time)
@@ -1249,7 +1252,7 @@
                   (:blob sid _) (println "|Ignoring binary client packet:" sid)
                 , &unit
           :examples $ []
-          :schema $ quote $ Fn Number (-> FfiTask)
+          :schema $ quote $ Fn Number (-> FfiTask) (:features :io :state)
         'storage-file $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def storage-file
             if (empty? calcit-dirname)
@@ -1288,7 +1291,7 @@
                 , &unit
               , @complete?
           :examples $ []
-          :schema $ quote $ Fn (ReelState schema/Db) (-> Bool)
+          :schema $ quote $ Fn (ReelState schema/Db) (-> Bool) (:features :io :state)
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.server
           :require (app.schema :as schema)

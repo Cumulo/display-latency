@@ -939,7 +939,7 @@
               (:some value)
                 if (nil? value) None value
           :examples $ []
-          :schema $ quote $ Fn (Option Dynamic) (-> Dynamic)
+          :schema $ quote $ Fn (Option Input) (-> Dynamic) (:generics Input)
         'parse-client-packet $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn parse-client-packet (text)
             try
@@ -1039,8 +1039,9 @@
                       , nested
                     , nested
           :examples $ []
-          :schema $ quote $ Fn Dynamic
+          :schema $ quote $ Fn Input
             -> $ Map Tag Dynamic
+            :generics Input
         'session $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def session
             Session :user-id None :id None :nickname None :router router :messages $ {}
@@ -1092,8 +1093,9 @@
                 .assoc source :nickname $ optional-input $ get source :nickname
                 , :avatar $ optional-input $ get source :avatar
           :examples $ []
-          :schema $ quote $ Fn Dynamic
+          :schema $ quote $ Fn Input
             -> $ Map Tag Dynamic
+            :generics Input
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.schema
           :require

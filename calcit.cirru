@@ -48,18 +48,9 @@
                       , value
               ws-connect! (str |ws:// host |: port)
                 {}
-                  :on-open $ fn (event)
-                    hint-fn $ Fn Dynamic $ -> Unit
-                    simulate-login!
-                    on-open
-                    , &unit
-                  :on-close $ fn (event)
-                    hint-fn $ Fn Dynamic $ -> Unit
-                    stop-test-loop!
-                    reset! *store None
-                    println "|Lost connection!"
+                  :on-open $ fn (event) (simulate-login!) (on-open) &unit
+                  :on-close $ fn (event) (stop-test-loop!) (reset! *store None) (println "|Lost connection!")
                   :on-data $ fn (data)
-                    hint-fn $ Fn Dynamic $ -> Unit
                     match (schema/decode-server-packet data)
                       (:err detail) (println "|Rejected server packet:" detail)
                       (:ok packet) (on-server-data packet)

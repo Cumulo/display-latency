@@ -48,18 +48,9 @@
                       , value
               ws-connect! (str |ws:// host |: port)
                 {}
-                  :on-open $ fn (event)
-                    hint-fn $ Fn Dynamic $ -> Unit
-                    simulate-login!
-                    on-open
-                    , &unit
-                  :on-close $ fn (event)
-                    hint-fn $ Fn Dynamic $ -> Unit
-                    stop-test-loop!
-                    reset! *store None
-                    println "|Lost connection!"
+                  :on-open $ fn (event) (simulate-login!) (on-open) &unit
+                  :on-close $ fn (event) (stop-test-loop!) (reset! *store None) (println "|Lost connection!")
                   :on-data $ fn (data)
-                    hint-fn $ Fn Dynamic $ -> Unit
                     match (schema/decode-server-packet data)
                       (:err detail) (println "|Rejected server packet:" detail)
                       (:ok packet) (on-server-data packet)
@@ -740,8 +731,9 @@
                 hint-fn $ Fn String $ -> (Result Op String)
                 Result :err detail
           :examples $ []
-          :schema $ quote $ Fn Tag Dynamic
+          :schema $ quote $ Fn Tag Payload
             -> $ Result Op String
+            :generics Payload
         'decode-client-store $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn decode-client-store (value)
             try
@@ -777,16 +769,12 @@
                         .unwrap-or (get source :sessions) ({})
                         Map Number Dynamic
                       fn (key value)
-                        hint-fn $ Fn Number Dynamic $ ->
-                          MapEntryDecision Number $ Map Tag Dynamic
                         MapEntryDecision :keep key $ session-input value
                     , :users $ filter-map-kv
                       decode-map-as
                         .unwrap-or (get source :users) ({})
                         Map String Dynamic
                       fn (key value)
-                        hint-fn $ Fn String Dynamic $ ->
-                          MapEntryDecision String $ Map Tag Dynamic
                         MapEntryDecision :keep key $ user-input value
                   , 'app.schema/Db
               fn (detail)
@@ -939,7 +927,7 @@
               (:some value)
                 if (nil? value) None value
           :examples $ []
-          :schema $ quote $ Fn (Option Dynamic) (-> Dynamic)
+          :schema $ quote $ Fn (Option Input) (-> Dynamic) (:generics Input)
         'parse-client-packet $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn parse-client-packet (text)
             try
@@ -1039,8 +1027,9 @@
                       , nested
                     , nested
           :examples $ []
-          :schema $ quote $ Fn Dynamic
+          :schema $ quote $ Fn Input
             -> $ Map Tag Dynamic
+            :generics Input
         'session $ %{} 'CodeEntry (:doc |)
           :code $ quote $ def session
             Session :user-id None :id None :nickname None :router router :messages $ {}
@@ -1063,8 +1052,6 @@
                     .unwrap-or (get source :messages) ({})
                     Map String Dynamic
                   fn (key value)
-                    hint-fn $ Fn String Dynamic $ ->
-                      MapEntryDecision String $ Map Tag Dynamic
                     MapEntryDecision :keep key $ struct-input value
           :examples $ []
           :schema $ quote $ Fn Input
@@ -1092,8 +1079,9 @@
                 .assoc source :nickname $ optional-input $ get source :nickname
                 , :avatar $ optional-input $ get source :avatar
           :examples $ []
-          :schema $ quote $ Fn Dynamic
+          :schema $ quote $ Fn Input
             -> $ Map Tag Dynamic
+            :generics Input
       :ns $ %{} 'NsEntry (:doc |)
         :code $ quote $ ns app.schema
           :require
@@ -1216,7 +1204,7 @@
           :code $ quote $ defn replay-updater (db op sid op-id op-time)
             updater db (decode-map-as op 'app.schema/Op) (decode-map-as sid 'Number) (decode-map-as op-id 'String) (decode-map-as op-time 'Number)
           :examples $ []
-          :schema $ quote $ Fn schema/Db Dynamic Dynamic Dynamic Dynamic (-> schema/Db)
+          :schema $ quote $ Fn schema/Db Operation SessionId OperationId Timestamp (-> schema/Db) (:generics Operation SessionId OperationId Timestamp)
           :tests $ [] $ %{} 'TestEntry (:name |replays-concrete-operation-history)
             :code $ quote $ let
                 reel $ ReelState :base schema/database :db schema/database :records ([]) :merged? false

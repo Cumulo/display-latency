@@ -740,8 +740,9 @@
                 hint-fn $ Fn String $ -> (Result Op String)
                 Result :err detail
           :examples $ []
-          :schema $ quote $ Fn Tag Dynamic
+          :schema $ quote $ Fn Tag Payload
             -> $ Result Op String
+            :generics Payload
         'decode-client-store $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn decode-client-store (value)
             try

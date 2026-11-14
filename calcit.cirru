@@ -778,16 +778,12 @@
                         .unwrap-or (get source :sessions) ({})
                         Map Number Dynamic
                       fn (key value)
-                        hint-fn $ Fn Number Dynamic $ ->
-                          MapEntryDecision Number $ Map Tag Dynamic
                         MapEntryDecision :keep key $ session-input value
                     , :users $ filter-map-kv
                       decode-map-as
                         .unwrap-or (get source :users) ({})
                         Map String Dynamic
                       fn (key value)
-                        hint-fn $ Fn String Dynamic $ ->
-                          MapEntryDecision String $ Map Tag Dynamic
                         MapEntryDecision :keep key $ user-input value
                   , 'app.schema/Db
               fn (detail)
@@ -1065,8 +1061,6 @@
                     .unwrap-or (get source :messages) ({})
                     Map String Dynamic
                   fn (key value)
-                    hint-fn $ Fn String Dynamic $ ->
-                      MapEntryDecision String $ Map Tag Dynamic
                     MapEntryDecision :keep key $ struct-input value
           :examples $ []
           :schema $ quote $ Fn Input

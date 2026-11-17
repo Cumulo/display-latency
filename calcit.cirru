@@ -59,7 +59,7 @@
             , &unit
           :examples $ []
           :schema $ quote $ Fn
-            Fn $ -> Unit
+            Fn (-> Unit) (:features :state)
             -> Unit
             :features :io :state
         'dispatch! $ %{} 'CodeEntry (:doc |)
@@ -144,7 +144,7 @@
           :code $ quote $ defn send-op! (op)
             ws-send! $ schema/op-wire op
           :examples $ []
-          :schema $ quote $ Fn schema/Op (-> Unit)
+          :schema $ quote $ Fn schema/Op (-> Unit) (:features :state)
         'simulate-login! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn simulate-login! ()
             match
@@ -157,7 +157,7 @@
                   (:err detail) (println "|Rejected stored credentials:" detail)
             , &unit
           :examples $ []
-          :schema $ quote $ Fn (-> Unit) (:features :io)
+          :schema $ quote $ Fn (-> Unit) (:features :io :state)
         'start-test-loop! $ %{} 'CodeEntry (:doc |)
           :code $ quote $ defn start-test-loop! () (stop-test-loop!)
             reset! *ping-timer $ Some $ browser/set-interval!

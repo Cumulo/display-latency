@@ -5,7 +5,7 @@
 ## Calcit 0.44.0 升级
 
 前端与原生服务使用 Calcit 0.44.0。升级现有实例时，按 `deps.cirru` 安装完整依赖图，
-重新构建前端并重启服务。现有 WebSocket 封包、账户存档和部署路径可继续使用。服务端依赖 WSS 0.2.46 与 Std 0.2.58。
+重新构建前端并重启服务。现有 WebSocket 封包、账户存档和部署路径可继续使用。服务端依赖 WSS 0.2.46 与 Std 0.2.58。 Cumulo Reel 0.3.8、WS-EDN 0.2.6 和 Recollect 0.3.10 等依赖按清单统一。
 
 登录表单直接使用 `LoginState`，应用分发接收 `UiAction`，延迟列表使用 Respo
 的 `ChildPair` 保留每行的稳定键。首次同步没有旧快照时，在 Recollect 调用处

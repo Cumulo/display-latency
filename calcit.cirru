@@ -46,16 +46,16 @@
                     if (empty? value)
                       str $ :port config/site
                       , value
-              ws-connect! (str |ws:// host |: port)
-                {}
-                  :on-open $ fn (event) (simulate-login!) (on-open) &unit
-                  :on-close $ fn (event) (stop-test-loop!) (reset! *store None) (println "|Lost connection!")
-                  :on-data $ fn (data)
-                    match (schema/decode-server-packet data)
-                      (:err detail) (println "|Rejected server packet:" detail)
-                      (:ok packet) (on-server-data packet)
-                    , &unit
-                  :class-mapper schema/client-wire-classes
+                opened $ fn (event) (simulate-login!) (on-open) &unit
+                closed $ fn (event) (stop-test-loop!) (reset! *store None) (println "|Lost connection!") &unit
+                received $ fn (data)
+                  match (schema/decode-server-packet data)
+                    (:err detail) (println "|Rejected server packet:" detail)
+                    (:ok packet) (on-server-data packet)
+                  , &unit
+              ws-edn.client/ws-connect-typed! (str |ws:// host |: port)
+                ws-edn.client/ClientConfig :retry-base-ms None :retry-max-ms None :retry-jitter None :heartbeat-timeout-ms None :class-mapper schema/client-wire-classes
+                ws-edn.client/ClientCallbacks :on-open (Some opened) :on-close (Some closed) :on-error None :on-data $ Some received
             , &unit
           :examples $ []
           :schema $ quote $ Fn

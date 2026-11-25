@@ -2,10 +2,10 @@
 
 展示浏览器与原生服务之间的往返延迟。
 
-## Calcit 0.44.0 升级
+## Calcit 0.45.0 升级
 
-前端与原生服务使用 Calcit 0.44.0。升级现有实例时，按 `deps.cirru` 安装完整依赖图，
-重新构建前端并重启服务。现有 WebSocket 封包、账户存档和部署路径可继续使用。服务端依赖 WSS 0.2.46 与 Std 0.2.58。 Cumulo Reel 0.3.9、WS-EDN 0.2.7 和 Recollect 0.3.10 等依赖按清单统一。
+前端与原生服务使用 Calcit 0.45.0。升级现有实例时，按 `deps.cirru` 安装完整依赖图，
+重新构建前端并重启服务。现有 WebSocket 封包、账户存档和部署路径可继续使用。服务端依赖 WSS 0.2.46 与 Std 0.2.58。 Cumulo Reel 0.3.12、WS-EDN 0.3.1 和 Recollect 0.3.13 等依赖按清单统一。
 
 登录表单直接使用 `LoginState`，应用分发接收 `UiAction`，延迟列表使用 Respo
 的 `ChildPair` 保留每行的稳定键。客户端连接按事件使用类型化回调，断线清理行为不变。首次同步没有旧快照时，在 Recollect 调用处
@@ -13,8 +13,8 @@
 
 ## 开发
 
-先安装正式 Calcit 0.44.0，并按 [Caps 官方说明](https://github.com/calcit-lang/caps)
-独立安装与 CI 一致的 Caps 0.1.1：`cargo install calcit-caps --version 0.1.1 --locked`。
+先安装正式 Calcit 0.45.0，并按 [Caps 官方说明](https://github.com/calcit-lang/caps)
+独立安装与 CI 一致的 Caps 0.1.2：`cargo install calcit-caps --version 0.1.2 --locked`。
 确认 `calcit` 与 `caps` 位于 PATH；Corepack/Yarn 不会安装 Caps。
 
 `calcit.cirru` 是唯一项目 Snapshot，`deps.cirru` 声明精确依赖，不使用
